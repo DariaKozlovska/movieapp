@@ -4,6 +4,9 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 
 ## Get started
 
+WAZNE! By projekt działał nalezy wygenerować osobisty API key korzystając ze strony https://www.themoviedb.org/, 
+a dalej naley umieścić kluch do pliku .env w głównym folderze projektu. 
+
 1. Install dependencies
 
    ```bash
@@ -15,6 +18,8 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    ```bash
    npx expo start
    ```
+
+3. By wybrać środowisko nalezy wcisnąc i dla IOS Simulatora albo a dla Android Emulatora
 
 In the output, you'll find options to open the app in a
 
@@ -48,3 +53,4 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+

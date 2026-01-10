@@ -33,3 +33,15 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+// import { Stack } from 'expo-router';
+
+// export default function Layout() {
+//   return (
+//     <Stack
+//       screenOptions={{
+//         headerShown: true,
+//       }}
+//     />
+//   );
+// }
