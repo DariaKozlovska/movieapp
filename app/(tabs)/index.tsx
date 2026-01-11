@@ -1,12 +1,8 @@
 import { View, StyleSheet, Text } from 'react-native';
-import { useState } from 'react';
-import SwipeCard from '../../components/SwipeCard';
-// import movies from '../../data/movies.json'; // tymczasowe dane
 import { useSwipeMovies } from '../../hooks/useSwipeMovies';
+import SwipeCard from '../../components/SwipeCard';
 
 export default function SwipeScreen() {
-  const [index, setIndex] = useState(0);
-  // const [currentIndex, setCurrentIndex] = useState(0);
   const {
     movies,
     currentIndex,
@@ -15,38 +11,38 @@ export default function SwipeScreen() {
     loading,
   } = useSwipeMovies();
 
-  const movie = movies[index];
-
   const currentMovie = movies[currentIndex];
   const nextMovie = movies[currentIndex + 1];
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Ładowanie filmów...</Text>
+      <View style={styles.loading}>
+        <Text style={{ color: '#fff', fontSize: 18 }}>Ładowanie filmów...</Text>
       </View>
     );
   }
-  
+
   if (!currentMovie) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Brak kolejnych filmów </Text>
+      <View style={styles.loading}>
+        <Text style={{ color: '#fff', fontSize: 18 }}>Brak kolejnych filmów</Text>
       </View>
     );
   }
 
-  if (!movie) return null;
-
   return (
-    <View style={{ flex: 1 }}>
-      {nextMovie && <SwipeCard movie={nextMovie} disabled />}
+    <View style={styles.container}>
+      {/* karta pod spodem */}
+      {nextMovie && <SwipeCard movie={nextMovie} disabled isNextCard />}
 
-      <SwipeCard
-        movie={currentMovie}
-        onSwipeLeft={swipeLeft}
-        onSwipeRight={swipeRight}
-      />
+      {/* aktywna karta */}
+      {currentMovie && (
+        <SwipeCard
+          movie={currentMovie}
+          onSwipeLeft={swipeLeft}
+          onSwipeRight={swipeRight}
+        />
+      )}
     </View>
   );
 }
@@ -54,10 +50,18 @@ export default function SwipeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#121212', 
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  card: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
+  loading: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  inactiveOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.7)', // półprzezroczysta nakładka
+    borderRadius: 20,
   },
 });

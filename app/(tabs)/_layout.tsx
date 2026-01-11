@@ -12,8 +12,16 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
+        tabBarStyle: {
+          backgroundColor: '#1E1E1E', // ciemniejszy szary pasek
+          borderTopWidth: 0,
+          height: 80,
+          paddingBottom: 10,
+          paddingTop: 10,
+        },
+        tabBarActiveTintColor: '#fff',
+        tabBarInactiveTintColor: '#aaa',
         tabBarButton: HapticTab,
       }}>
       <Tabs.Screen
@@ -33,15 +41,3 @@ export default function TabLayout() {
     </Tabs>
   );
 }
-
-// import { Stack } from 'expo-router';
-
-// export default function Layout() {
-//   return (
-//     <Stack
-//       screenOptions={{
-//         headerShown: true,
-//       }}
-//     />
-//   );
-// }

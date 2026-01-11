@@ -8,12 +8,16 @@ export const useSwipeMovies = () => {
   const [liked, setLiked] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
 
-  const fetchMovies = async () => {
+  const fetchMovies = async (pageNumber = 1) => {
     try {
       setLoading(true);
-      const data = await getPopularMovies();
-      setMovies(data);
+      const data = await getPopularMovies(pageNumber);
+
+      setMovies(prev =>
+        pageNumber === 1 ? data : [...prev, ...data]
+      );
     } catch (err) {
       setError('Nie udało się pobrać filmów');
     } finally {
@@ -35,8 +39,16 @@ export const useSwipeMovies = () => {
   };
 
   useEffect(() => {
-    fetchMovies();
+    fetchMovies(1);
   }, []);
+
+  useEffect(() => {
+    if (movies.length - currentIndex <= 3 && !loading) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      fetchMovies(nextPage);
+    }
+  }, [currentIndex]);
 
   return {
     movies,
