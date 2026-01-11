@@ -1,23 +1,22 @@
 import { useEffect, useState } from 'react';
 import { Movie } from '../models/Movie';
 import { getPopularMovies } from '../api/tmdbApi';
+import { useLikedMovies } from '../contexts/LikedMoviesContext';
 
 export const useSwipeMovies = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [liked, setLiked] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+
+  const { addLikedMovie } = useLikedMovies();
 
   const fetchMovies = async (pageNumber = 1) => {
     try {
       setLoading(true);
       const data = await getPopularMovies(pageNumber);
-
-      setMovies(prev =>
-        pageNumber === 1 ? data : [...prev, ...data]
-      );
+      setMovies((prev) => (pageNumber === 1 ? data : [...prev, ...data]));
     } catch (err) {
       setError('Nie udało się pobrać filmów');
     } finally {
@@ -27,7 +26,7 @@ export const useSwipeMovies = () => {
 
   const swipeRight = () => {
     if (currentIndex < movies.length) {
-      setLiked([...liked, movies[currentIndex]]);
+      addLikedMovie(movies[currentIndex]); // dodanie do kontekstu
       setCurrentIndex(currentIndex + 1);
     }
   };
@@ -53,7 +52,6 @@ export const useSwipeMovies = () => {
   return {
     movies,
     currentIndex,
-    liked,
     swipeLeft,
     swipeRight,
     loading,

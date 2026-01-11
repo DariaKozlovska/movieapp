@@ -1,41 +1,40 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
-
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: '#1E1E1E', // ciemniejszy szary pasek
-          borderTopWidth: 0,
-          height: 80,
-          paddingBottom: 10,
-          paddingTop: 10,
-        },
-        tabBarActiveTintColor: '#fff',
-        tabBarInactiveTintColor: '#aaa',
-        tabBarButton: HapticTab,
-      }}>
+        tabBarStyle: { backgroundColor: '#121212' },
+        tabBarActiveTintColor: 'rgba(0,255,0,0.6)',
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: 'Swipe',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="swap-horizontal" color={color} size={size} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="liked"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Polubione',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="heart" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="watched"
+        options={{
+          title: 'Obejrzane',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="eye" color={color} size={size} />
+          ),
         }}
       />
     </Tabs>

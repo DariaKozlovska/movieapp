@@ -7,7 +7,9 @@ import {
   TouchableOpacity,
   Linking,
   Alert,
+  Pressable,
 } from 'react-native';
+import { useRouter } from 'expo-router'; 
 import { PanGestureHandler } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
@@ -35,7 +37,7 @@ interface Props {
   onSwipeLeft?: () => void;
   onSwipeRight?: () => void;
   disabled?: boolean;
-  isNextCard?: boolean; // czy to jest karta pod spodem
+  isNextCard?: boolean;
 }
 
 export default function SwipeCard({
@@ -45,9 +47,9 @@ export default function SwipeCard({
   disabled = false,
   isNextCard = false,
 }: Props) {
+  const router = useRouter(); 
   const translateX = useSharedValue(0);
 
-  // reset translateX przy nowej karcie
   useEffect(() => {
     translateX.value = 0;
   }, [movie.id]);
@@ -56,12 +58,8 @@ export default function SwipeCard({
     transform: [{ translateX: translateX.value }],
   }));
 
-  // nakładka swipe
   const swipeOverlayStyle = useAnimatedStyle(() => {
-    if (isNextCard) {
-      // karta pod spodem nie reaguje
-      return { opacity: 0 };
-    }
+    if (isNextCard) return { opacity: 0 };
 
     const opacity = interpolate(
       Math.abs(translateX.value),
@@ -123,6 +121,10 @@ export default function SwipeCard({
     }
   };
 
+  const goToDetails = () => {
+    router.push(`/movie/${movie.id}`);
+  };
+
   return (
     <PanGestureHandler
       enabled={!disabled && !isNextCard}
@@ -131,26 +133,22 @@ export default function SwipeCard({
       onEnded={onEnd}
     >
       <Animated.View style={[styles.card, animatedStyle]}>
-        <View style={styles.cardInner}>
-
-          {/* Nakładka półprzezroczysta dla karty pod spodem */}
-          {isNextCard && <View style={styles.inactiveOverlay} />}
-
-          {/* Plakat filmu */}
+        <Pressable
+          style={styles.cardInner}
+          onPress={goToDetails} 
+        >
           <Image
             source={{ uri: `https://image.tmdb.org/t/p/w500${movie.poster_path}` }}
             style={styles.image}
           />
 
-          {/* Gradient na dole plakatu */}
           <LinearGradient
             colors={['transparent', 'rgba(0,0,0,0.9)']}
             style={styles.gradientOverlay}
           />
 
-          {/* Nakładka kolorowa przy swipe */}
+          <Animated.View style={swipeOverlayStyle} />
 
-          {/* Dolny blok z tytułem i przyciskiem */}
           <View style={styles.bottomBlock}>
             <Text style={styles.title}>{movie.title}</Text>
             <TouchableOpacity
@@ -158,13 +156,12 @@ export default function SwipeCard({
               onPress={openTrailer}
               activeOpacity={0.8}
             >
-              <Text style={styles.trailerText}>🎬 Obejrzyj zwiastun</Text>
+              <Text style={styles.trailerText}> Obejrzyj zwiastun</Text>
             </TouchableOpacity>
           </View>
 
-          <Animated.View style={swipeOverlayStyle} />
-
-        </View>
+          {isNextCard && <View style={styles.inactiveOverlay} />}
+        </Pressable>
       </Animated.View>
     </PanGestureHandler>
   );
@@ -187,7 +184,7 @@ const styles = StyleSheet.create({
   cardInner: {
     flex: 1,
     borderRadius: 20,
-    overflow: 'hidden', // tylko obrazek i gradienty są przycięte, cień działa na zewnątrz
+    overflow: 'hidden',
   },
   inactiveOverlay: {
     ...StyleSheet.absoluteFillObject,
