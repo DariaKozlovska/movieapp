@@ -45,12 +45,12 @@ export default function MovieDetailsScreen() {
       />
 
       <Text style={styles.title}>{movie.title}</Text>
-      <Text style={styles.rating}>⭐ {movie.vote_average}</Text>
+      <Text style={styles.rating}>{movie.vote_average.toFixed(1)}</Text>
       <Text style={styles.overview}>{movie.overview}</Text>
       <Text style={styles.date}>Premiera: {movie.release_date}</Text>
 
       <TouchableOpacity style={styles.trailerButton} onPress={openTrailer} activeOpacity={0.8}>
-        <Text style={styles.trailerText}>🎬 Zobacz zwiastun</Text>
+        <Text style={styles.trailerText}>Zobacz zwiastun</Text>
       </TouchableOpacity>
     </ScrollView>
   );

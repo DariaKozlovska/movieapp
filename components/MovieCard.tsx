@@ -5,6 +5,7 @@ import { TMDB_IMAGE_URL } from '../constants/config';
 import { Movie } from '../models/Movie';
 import { WatchedMovie } from '../models/WatchedMovie';
 import StarRating from './StarRating';
+import { Alert } from 'react-native';
 
 interface Props {
   movie: Movie | WatchedMovie;
@@ -13,8 +14,10 @@ interface Props {
   onRemove: () => void;
   onEdit?: () => void;
   onPress?: () => void;
-  isWatched?: boolean; // <- dodane
+  isWatched?: boolean; 
 }
+
+const MAX_REVIEW_LENGTH = 100;
 
 export default function MovieCard({
   movie,
@@ -25,6 +28,26 @@ export default function MovieCard({
   onPress,
   isWatched = false,
 }: Props) {
+
+  const confirmRemove = () => {
+    Alert.alert(
+      'Usuń film',
+      'Czy na pewno chcesz usunąć ten film?',
+      [
+        {
+          text: 'Anuluj',
+          style: 'cancel',
+        },
+        {
+          text: 'Usuń',
+          style: 'destructive',
+          onPress: onRemove,
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
   return (
     <TouchableOpacity
       style={styles.card}
@@ -42,32 +65,66 @@ export default function MovieCard({
             <Text style={styles.title} numberOfLines={2}>
               {movie.title}
             </Text>
-            <StarRating rating={userRating ?? 0} onChange={() => {}} />
+            {isWatched ? (
+              <StarRating rating={userRating ?? 0} onChange={() => {}} />
+            ) : (
+              <Text style={styles.apiRating}>
+                Rating: {userRating?.toFixed(1)}
+              </Text>
+            )}
           </View>
-          <TouchableOpacity
-            onPress={onRemove}
-            style={styles.removeButton}
-          >
-          <View
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: 14,
-              backgroundColor: '#e50914',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            <Ionicons name="close" size={18} color="#fff" />
+          <View style={styles.rightBlock}>
+            <TouchableOpacity
+              onPress={confirmRemove}
+              style={styles.removeButton}
+            >
+            <View
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: 14,
+                backgroundColor: '#e50914',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Ionicons name="close" size={18} color="#fff" />
+            </View>
+            </TouchableOpacity>
+
+            {isWatched && onEdit && (
+              <TouchableOpacity onPress={onEdit} style={styles.removeButton}>
+                <View 
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: 14,
+                    backgroundColor: 'rgba(0,255,0,0.6)',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Ionicons name="pencil" size={18} color="#fff" />
+                </View>
+              </TouchableOpacity>
+            )}
           </View>
-          </TouchableOpacity>
         </View>
 
         {isWatched ? (
           userReview ? (
-            <Text style={{ color: '#ccc', marginBottom: 8 }} numberOfLines={3}>
+          <View>
+            <Text style={styles.review} numberOfLines={3}>
               "{userReview}"
             </Text>
+{/* 
+            {onEdit && (
+              <TouchableOpacity style={styles.editButton} onPress={onEdit}>
+                <Ionicons name="pencil" size={14} color="#00b894" />
+                <Text style={styles.editText}>Edytuj</Text>
+              </TouchableOpacity>
+            )} */}
+          </View>
           ) : null
         ) : (
           <TouchableOpacity
@@ -77,6 +134,7 @@ export default function MovieCard({
             <Text style={styles.watchedText}>Już obejrzałem</Text>
           </TouchableOpacity>
         )}
+
       </View>
     </TouchableOpacity>
   );
@@ -101,13 +159,34 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 6,
   },
-  image: { width: 100, height: 150, resizeMode: 'cover' },
+
+  apiRating: {
+    marginTop: 6,
+    color: '#efdb94ff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  review: {
+    color: '#ccc',
+    marginBottom: 8,
+    fontStyle: 'italic',
+  },
+  removeCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#e50914',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  image: { width: 100, minHeight: 150, alignSelf: 'stretch', resizeMode: 'cover' },
   infoBlock: { flex: 1, padding: 12, justifyContent: 'space-between' },
   textBlock: { flex: 1, paddingRight: 26, justifyContent: 'flex-start' },
   topBlock: { flex: 1, flexDirection: 'row', justifyContent: 'space-between'},
-  title: { color: '#fff', fontSize: 18, fontWeight: '600' },
+  title: { color: '#fff', fontSize: 24, fontWeight: '700' },
   rating: { marginTop: 6, color: '#aaa', fontSize: 14 },
-  rightBlock: { justifyContent: 'space-between', alignItems: 'flex-end' },
+  rightBlock: { alignItems: 'flex-end' },
   removeButton: { padding: 4 },
   removeText: { color: '#e50914', fontSize: 20, fontWeight: '700' },
   watchedButton: { backgroundColor: 'rgba(0,255,0,0.6)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10 },
