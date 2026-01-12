@@ -63,6 +63,7 @@ export default function AddCustomMovieModal({ visible, onClose }: Props) {
         >
           <View style={styles.modal}>
             <Text style={styles.modalTitle}>Dodaj własny film</Text>
+            <Text style={{ color: '#fff', marginBottom: 12, fontStyle: 'italic', textAlign: 'center' }}>Później nie będziesz mógł edytować tego filmu.</Text>
 
             <TextInput
               placeholder="Tytuł filmu"

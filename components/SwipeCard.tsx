@@ -152,7 +152,7 @@ export default function SwipeCard({
               onPress={openTrailer}
               activeOpacity={0.8}
             >
-              <Text style={styles.trailerText}>🎬 Obejrzyj zwiastun</Text>
+              <Text style={styles.trailerText}> Obejrzyj zwiastun</Text>
             </TouchableOpacity>
           </View>
         </Pressable>

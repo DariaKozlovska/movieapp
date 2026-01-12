@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, TextInput, Modal, TouchableOpacity, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Modal, TouchableOpacity, Keyboard, TouchableWithoutFeedback, KeyboardAvoidingView } from 'react-native';
 import StarRating from './StarRating';
+import { Platform } from 'react-native';
 
 interface Props {
   visible: boolean;
@@ -32,9 +33,11 @@ export default function AddWatchedModal({
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.modalOverlay}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.modalOverlay}
+        >
           <View style={styles.modal}>
-            {/* Tytuł lub input do tytułu własnego filmu */}
             {onChangeTitle ? (
               <TextInput
                 placeholder={placeholderTitle}
@@ -71,7 +74,7 @@ export default function AddWatchedModal({
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
     </Modal>
   );
