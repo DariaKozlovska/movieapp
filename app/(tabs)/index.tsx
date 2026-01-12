@@ -14,10 +14,10 @@ export default function SwipeScreen() {
   const currentMovie = movies[currentIndex];
   const nextMovie = movies[currentIndex + 1];
 
-  if (loading) {
+  if (loading && movies.length === 0) {
     return (
       <View style={styles.loading}>
-        <Text style={{ color: '#fff', fontSize: 18 }}>Ładowanie filmów...</Text>
+        <Text style={styles.text}>Ładowanie filmów...</Text>
       </View>
     );
   }
@@ -25,22 +25,26 @@ export default function SwipeScreen() {
   if (!currentMovie) {
     return (
       <View style={styles.loading}>
-        <Text style={{ color: '#fff', fontSize: 18 }}>Brak kolejnych filmów</Text>
+        <Text style={styles.text}>Brak kolejnych filmów</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      {nextMovie && <SwipeCard movie={nextMovie} disabled isNextCard />}
-
-      {currentMovie && (
+      {nextMovie && (
         <SwipeCard
-          movie={currentMovie}
-          onSwipeLeft={swipeLeft}
-          onSwipeRight={swipeRight}
+          movie={nextMovie}
+          disabled
+          isNextCard
         />
       )}
+
+      <SwipeCard
+        movie={currentMovie}
+        onSwipeLeft={swipeLeft}
+        onSwipeRight={swipeRight}
+      />
     </View>
   );
 }
@@ -48,7 +52,7 @@ export default function SwipeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212', 
+    backgroundColor: '#121212',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -57,9 +61,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  inactiveOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.7)', 
-    borderRadius: 20,
+  text: {
+    color: '#fff',
+    fontSize: 18,
   },
 });

@@ -5,7 +5,7 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 ## Get started
 
 WAZNE! By projekt działał nalezy wygenerować osobisty API key korzystając ze strony https://www.themoviedb.org/, 
-a dalej naley umieścić kluch do pliku .env w głównym folderze projektu. 
+a dalej naley umieścić kluch do pliku .env w głównym folderze projektu. EXPO_PUBLIC_TMDB_API_KEY='Twoj_API_Key'
 
 1. Install dependencies
 

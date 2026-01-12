@@ -23,7 +23,7 @@ export const getPopularMovies = async (
       params: {
         api_key: TMDB_API_KEY,
         language: 'pl-PL',
-        page, // 👈 KLUCZOWE
+        page,
       },
     }
   );
