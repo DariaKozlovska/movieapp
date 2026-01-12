@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Linking,
   Alert,
+  Pressable,
 } from 'react-native';
 import { PanGestureHandler } from 'react-native-gesture-handler';
 import Animated, {
@@ -18,12 +19,15 @@ import Animated, {
   Extrapolate,
 } from 'react-native-reanimated';
 import { useEffect } from 'react';
+import { useRouter } from 'expo-router';
 import { getMovieTrailer } from '../api/tmdbApi';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const { width, height } = Dimensions.get('window');
+
 const CARD_WIDTH = width * 0.9;
 const CARD_HEIGHT = height * 0.75;
+const SWIPE_THRESHOLD = width * 0.25;
 
 interface Props {
   movie: {
@@ -44,6 +48,7 @@ export default function SwipeCard({
   disabled = false,
   isNextCard = false,
 }: Props) {
+  const router = useRouter();
   const translateX = useSharedValue(0);
 
   useEffect(() => {
@@ -54,25 +59,28 @@ export default function SwipeCard({
     transform: [{ translateX: translateX.value }],
   }));
 
-  const overlayStyle = useAnimatedStyle(() => {
+  const swipeOverlayStyle = useAnimatedStyle(() => {
     if (isNextCard) return { opacity: 0 };
 
     const opacity = interpolate(
       Math.abs(translateX.value),
-      [0, width * 0.25],
+      [0, SWIPE_THRESHOLD],
       [0, 0.6],
       Extrapolate.CLAMP
     );
 
+    const color =
+      translateX.value > 0
+        ? 'rgba(0,255,0,0.6)'
+        : translateX.value < 0
+        ? 'rgba(255,0,0,0.6)'
+        : 'transparent';
+
     return {
-      opacity,
-      backgroundColor:
-        translateX.value > 0
-          ? 'rgba(0,255,0,0.4)'
-          : translateX.value < 0
-          ? 'rgba(255,0,0,0.4)'
-          : 'transparent',
       ...StyleSheet.absoluteFillObject,
+      backgroundColor: color,
+      opacity,
+      borderRadius: 20,
     };
   });
 
@@ -84,11 +92,11 @@ export default function SwipeCard({
   const onEnd = () => {
     if (disabled) return;
 
-    if (translateX.value > width * 0.25) {
+    if (translateX.value > SWIPE_THRESHOLD) {
       translateX.value = withSpring(width, {}, () => {
         onSwipeRight && runOnJS(onSwipeRight)();
       });
-    } else if (translateX.value < -width * 0.25) {
+    } else if (translateX.value < -SWIPE_THRESHOLD) {
       translateX.value = withSpring(-width, {}, () => {
         onSwipeLeft && runOnJS(onSwipeLeft)();
       });
@@ -104,21 +112,26 @@ export default function SwipeCard({
         Alert.alert('Brak zwiastuna');
         return;
       }
-      Linking.openURL(url);
+      await Linking.openURL(url);
     } catch {
-      Alert.alert('Błąd otwierania zwiastuna');
+      Alert.alert('Błąd', 'Nie udało się otworzyć zwiastuna.');
     }
   };
 
   return (
     <PanGestureHandler
       enabled={!disabled && !isNextCard}
+      activeOffsetX={[-15, 15]}
       onGestureEvent={onGestureEvent}
       onEnded={onEnd}
-      activeOffsetX={[-10, 10]}
     >
       <Animated.View style={[styles.card, animatedStyle]}>
-        <View style={styles.inner}>
+        <Pressable
+          style={styles.cardInner}
+          onPress={() => router.push(`/movie/${movie.id}`)}
+        >
+          {isNextCard && <View style={styles.inactiveOverlay} />}
+
           <Image
             source={{ uri: `https://image.tmdb.org/t/p/w500${movie.poster_path}` }}
             style={styles.image}
@@ -126,20 +139,23 @@ export default function SwipeCard({
 
           <LinearGradient
             colors={['transparent', 'rgba(0,0,0,0.9)']}
-            style={styles.gradient}
+            style={styles.gradientOverlay}
           />
 
-          <View style={styles.bottom}>
+          <Animated.View style={swipeOverlayStyle} />
+
+          <View style={styles.bottomBlock}>
             <Text style={styles.title}>{movie.title}</Text>
-            <TouchableOpacity style={styles.button} onPress={openTrailer}>
-              <Text style={styles.buttonText}>🎬 Zwiastun</Text>
+
+            <TouchableOpacity
+              style={styles.trailerButton}
+              onPress={openTrailer}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.trailerText}>🎬 Obejrzyj zwiastun</Text>
             </TouchableOpacity>
           </View>
-
-          <Animated.View style={overlayStyle} />
-
-          {isNextCard && <View style={styles.inactive} />}
-        </View>
+        </Pressable>
       </Animated.View>
     </PanGestureHandler>
   );
@@ -151,52 +167,57 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
     borderRadius: 20,
+    alignSelf: 'center',
     backgroundColor: '#000',
     elevation: 8,
   },
-  inner: {
+  cardInner: {
     flex: 1,
     borderRadius: 20,
     overflow: 'hidden',
   },
+  inactiveOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
   image: {
     width: '100%',
     height: '82%',
+    resizeMode: 'cover',
   },
-  gradient: {
+  gradientOverlay: {
     position: 'absolute',
     bottom: '18%',
     width: '100%',
     height: '15%',
   },
-  bottom: {
+  bottomBlock: {
     position: 'absolute',
     bottom: 0,
-    height: '18%',
     width: '100%',
+    height: '18%',
+    backgroundColor: '#000',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#000',
+    paddingHorizontal: 16,
   },
   title: {
     color: '#fff',
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '700',
-    marginBottom: 8,
+    marginBottom: 6,
     textAlign: 'center',
   },
-  button: {
+  trailerButton: {
     backgroundColor: '#e50914',
-    paddingHorizontal: 24,
     paddingVertical: 10,
     borderRadius: 10,
+    width: '90%',
+    alignItems: 'center',
   },
-  buttonText: {
+  trailerText: {
     color: '#fff',
+    fontSize: 15,
     fontWeight: '600',
-  },
-  inactive: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.25)',
   },
 });

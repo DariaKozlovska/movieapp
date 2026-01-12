@@ -29,23 +29,36 @@ type AnyMovie = {
   release_date?: string;
   userRating?: number;
   review?: string;
+  trailer_url?: string;
 };
 
 export default function MovieDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { movies } = useMovies();
-  const { watchedMovies, updateWatchedMovie } = useWatchedMovies();
+  const { watchedMovies, updateWatchedMovie, addWatchedMovie } = useWatchedMovies();
   const { likedMovies } = useLikedMovies();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [rating, setRating] = useState(3);
   const [review, setReview] = useState('');
 
-  // Szukamy film w kolejności: watched -> liked -> API
-  const movie: AnyMovie | undefined =
-    watchedMovies.find((m) => m.id.toString() === id) ||
-    likedMovies.find((m) => m.id.toString() === id) ||
-    movies.find((m) => m.id.toString() === id);
+  // 🔹 Znajdź film w watched, liked lub API
+  const watchedMovie = watchedMovies.find((m) => m.id.toString() === id);
+  const likedMovie = likedMovies.find((m) => m.id.toString() === id);
+  const apiMovie = movies.find((m) => m.id.toString() === id);
+
+  const movie: AnyMovie | undefined = watchedMovie || likedMovie || apiMovie;
+
+  // 🔹 Sprawdzenie, czy film jest już w watched
+  const isUserAdded = !!watchedMovie;
+
+  // ✅ Hook zawsze wywołany
+  useEffect(() => {
+    if (!movie || !isUserAdded) return;
+
+    setRating(watchedMovie?.userRating ?? 3);
+    setReview(watchedMovie?.review ?? '');
+  }, [movie?.id, isUserAdded]);
 
   if (!movie) {
     return (
@@ -55,32 +68,19 @@ export default function MovieDetailsScreen() {
     );
   }
 
-  // Sprawdzenie, czy film został dodany przez użytkownika
-  const isUserAdded = watchedMovies.some((m) => m.id === movie.id);
-
-  // Ustawiamy początkowe wartości dla modalu tylko jeśli film jest userAdded
-  useEffect(() => {
-    if (isUserAdded) {
-      const watchedMovie = watchedMovies.find((m) => m.id === movie.id);
-      setRating(watchedMovie?.userRating ?? 3);
-      setReview(watchedMovie?.review ?? '');
-    }
-  }, [movie.id, isUserAdded]);
-
   const posterUri = movie.poster_path
     ? movie.poster_path.startsWith('http')
       ? movie.poster_path
       : `${TMDB_IMAGE_URL}${movie.poster_path}`
     : null;
 
-  const displayRating = movie.userRating ?? movie.vote_average ?? null;
+  const displayRating = 'userRating' in movie ? movie.userRating ?? movie.vote_average : movie.vote_average;
   const overview = movie.overview ?? 'Brak opisu';
-  const userReview = movie.review;
-  const releaseDate = movie.release_date;
+  const releaseDate = 'release_date' in movie ? movie.release_date : undefined;
 
   const openTrailer = async () => {
     try {
-      const url = await getMovieTrailer(movie.id);
+      const url = movie.trailer_url ?? (await getMovieTrailer(movie.id));
       if (!url) {
         Alert.alert('Brak zwiastuna', 'Ten film nie ma dostępnego zwiastuna.');
         return;
@@ -92,10 +92,25 @@ export default function MovieDetailsScreen() {
   };
 
   const saveChanges = () => {
-    if (!isUserAdded) return;
-    updateWatchedMovie(movie.id, rating, review);
+    if (isUserAdded) {
+      updateWatchedMovie(movie.id, rating, review);
+    } else {
+      // dodanie filmu do watched
+      // Type assertion, bo watchedMovie wymaga Movie
+      const movieToAdd = {
+        id: movie.id,
+        title: movie.title,
+        poster_path: movie.poster_path ?? '',
+        overview: movie.overview ?? '',
+        release_date: movie.release_date ?? '',
+        vote_average: movie.vote_average ?? 0,
+        trailer_url: movie.trailer_url,
+      };
+      addWatchedMovie(movieToAdd, rating, review);
+    }
+
     setModalVisible(false);
-    Alert.alert('Sukces', 'Zaktualizowano ocenę/opinię filmu.');
+    Alert.alert('Sukces', 'Zapisano zmiany');
   };
 
   return (
@@ -112,46 +127,18 @@ export default function MovieDetailsScreen() {
       )}
 
       <Text style={styles.title}>{movie.title}</Text>
+
       <Text style={styles.rating}>
-        {displayRating !== null ? displayRating.toFixed(1) : 'Brak oceny'}
+        {displayRating != null ? displayRating.toFixed(1) : 'Brak oceny'}
       </Text>
 
-      {/* Opis filmu */}
-      <Text style={styles.overview}>{userReview ?? overview}</Text>
+      <Text style={styles.overview}>{overview}</Text>
 
       {releaseDate && <Text style={styles.date}>Premiera: {releaseDate}</Text>}
 
-      <TouchableOpacity
-        style={styles.trailerButton}
-        onPress={openTrailer}
-        activeOpacity={0.8}
-      >
+      <TouchableOpacity style={styles.trailerButton} onPress={openTrailer}>
         <Text style={styles.trailerText}>Zobacz zwiastun</Text>
       </TouchableOpacity>
-
-      {/* Przycisk edycji tylko dla filmów dodanych przez użytkownika */}
-      {isUserAdded && (
-        <TouchableOpacity
-          style={[styles.trailerButton, { backgroundColor: '#2ecc71', marginTop: 16 }]}
-          onPress={() => setModalVisible(true)}
-        >
-          <Text style={styles.trailerText}>Edytuj film</Text>
-        </TouchableOpacity>
-      )}
-
-      {/* Modal do edycji filmu */}
-      {isUserAdded && (
-        <AddWatchedModal
-          visible={modalVisible}
-          title={movie.title}
-          rating={rating}
-          review={review}
-          onChangeRating={setRating}
-          onChangeReview={setReview}
-          onCancel={() => setModalVisible(false)}
-          onSave={saveChanges}
-        />
-      )}
     </ScrollView>
   );
 }
@@ -165,7 +152,6 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 16,
-    backgroundColor: '#121212',
     alignItems: 'center',
   },
   image: {
@@ -173,7 +159,6 @@ const styles = StyleSheet.create({
     height: 400,
     borderRadius: 16,
     marginBottom: 16,
-    resizeMode: 'cover',
   },
   noImage: {
     backgroundColor: '#333',
@@ -182,15 +167,12 @@ const styles = StyleSheet.create({
   },
   noImageText: {
     color: '#888',
-    fontSize: 16,
-    textAlign: 'center',
   },
   title: {
     fontSize: 26,
     fontWeight: 'bold',
     color: '#fff',
     textAlign: 'center',
-    marginBottom: 8,
   },
   rating: {
     fontSize: 18,
@@ -200,23 +182,20 @@ const styles = StyleSheet.create({
   overview: {
     fontSize: 16,
     color: '#ddd',
-    lineHeight: 22,
     textAlign: 'justify',
     marginBottom: 16,
   },
   date: {
     fontSize: 14,
     color: '#888',
-    marginBottom: 24,
   },
   trailerButton: {
     backgroundColor: '#e50914',
     paddingVertical: 14,
-    paddingHorizontal: 32,
     borderRadius: 12,
     width: '90%',
     alignItems: 'center',
-    marginBottom: 40,
+    marginTop: 16,
   },
   trailerText: {
     color: '#fff',
