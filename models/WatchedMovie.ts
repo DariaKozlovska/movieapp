@@ -8,4 +8,7 @@ export interface WatchedMovie {
   userRating: number; 
   review?: string;
   watchedAt: string;
+
+  overview?: string;
+  trailer_url?: string;
 }

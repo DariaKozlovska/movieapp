@@ -54,10 +54,21 @@ export default function MovieCard({
       activeOpacity={0.85}
       onPress={onPress}
     >
-      <Image
+
+      {movie.poster_path ? (
+        <Image
+          source={{ uri: `${TMDB_IMAGE_URL}${movie.poster_path}` }}
+          style={styles.image}
+        />
+      ) : (
+        <View style={[styles.image, styles.noImage]}>
+          <Text style={styles.noImageText}>Brak okładki</Text>
+        </View>
+      )}
+      {/* <Image
         source={{ uri: `${TMDB_IMAGE_URL}${movie.poster_path}` }}
         style={styles.image}
-      />
+      /> */}
 
       <View style={styles.infoBlock}>
         <View style={styles.topBlock}>
@@ -158,6 +169,17 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     shadowRadius: 10,
     elevation: 6,
+  },
+
+  noImage: {
+    backgroundColor: '#333',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noImageText: {
+    color: '#888',
+    fontSize: 12,
+    textAlign: 'center',
   },
 
   apiRating: {

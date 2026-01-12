@@ -32,10 +32,8 @@ export default function SwipeScreen() {
 
   return (
     <View style={styles.container}>
-      {/* karta pod spodem */}
       {nextMovie && <SwipeCard movie={nextMovie} disabled isNextCard />}
 
-      {/* aktywna karta */}
       {currentMovie && (
         <SwipeCard
           movie={currentMovie}
@@ -61,7 +59,7 @@ const styles = StyleSheet.create({
   },
   inactiveOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.7)', // półprzezroczysta nakładka
+    backgroundColor: 'rgba(0,0,0,0.7)', 
     borderRadius: 20,
   },
 });
