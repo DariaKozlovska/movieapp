@@ -11,4 +11,8 @@ export interface WatchedMovie {
 
   overview?: string;
   trailer_url?: string;
+
+  addedByUser?: boolean; 
+  createdAt?: number;
+  release_date?: string;
 }

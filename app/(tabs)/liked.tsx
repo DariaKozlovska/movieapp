@@ -84,8 +84,13 @@ export default function LikedMoviesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#121212' },
+  container: { flex: 1, backgroundColor: '#121212' }, 
   list: { padding: 16, paddingBottom: 32 },
-  empty: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  emptyText: { color: '#aaa', fontSize: 18 },
+  empty: { 
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center',
+    backgroundColor: '#121212' 
+  },
+  emptyText: { color: '#fff', fontSize: 16 },
 });

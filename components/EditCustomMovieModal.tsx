@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,48 +13,41 @@ import {
 } from 'react-native';
 import { useWatchedMovies } from '../contexts/WatchedMoviesContext';
 import StarRating from './StarRating';
-import { Movie } from '../models/Movie';
+import { WatchedMovie } from '../models/WatchedMovie';
 
 interface Props {
   visible: boolean;
+  movie: WatchedMovie;
   onClose: () => void;
 }
 
-export default function AddCustomMovieModal({ visible, onClose }: Props) {
-  const { addWatchedMovie } = useWatchedMovies();
+export default function EditCustomMovieModal({ visible, movie, onClose }: Props) {
+  const { updateWatchedMovie } = useWatchedMovies();
 
-  const [title, setTitle] = useState('');
-  const [poster, setPoster] = useState('');
-  const [overview, setOverview] = useState('');
-  const [rating, setRating] = useState(3);
-  const [review, setReview] = useState('');
-  const [trailerUrl, setTrailerUrl] = useState('');
+  const [title, setTitle] = useState(movie.title);
+  const [poster, setPoster] = useState(movie.poster_path ?? '');
+  const [overview, setOverview] = useState(movie.overview ?? '');
+  const [trailerUrl, setTrailerUrl] = useState(movie.trailer_url ?? '');
+  const [rating, setRating] = useState(movie.userRating ?? 3);
+  const [review, setReview] = useState(movie.review ?? '');
 
-  const submit = () => {
-    if (!title.trim()) return;
+  useEffect(() => {
+    // reset pól przy zmianie filmu
+    setTitle(movie.title);
+    setPoster(movie.poster_path ?? '');
+    setOverview(movie.overview ?? '');
+    setTrailerUrl(movie.trailer_url ?? '');
+    setRating(movie.userRating ?? 3);
+    setReview(movie.review ?? '');
+  }, [movie]);
 
-    const customMovie: Movie = {
-      id: Date.now(), // unikalne ID
+  const saveChanges = () => {
+    updateWatchedMovie(movie.id, rating, review, {
       title: title.trim(),
-      poster_path: poster.trim() || '',
+      poster_path: poster.trim(),
       overview: overview.trim(),
-      release_date: '',
-      vote_average: rating, 
-      trailer_url: trailerUrl.trim() || undefined,
-    };
-
-    // 🔹 KLUCZOWE: flaga przekazana jako options
-    addWatchedMovie(customMovie, rating, review, {
-      addedByUser: true,
+      trailer_url: trailerUrl.trim(),
     });
-
-    // reset
-    setTitle('');
-    setPoster('');
-    setOverview('');
-    setRating(3);
-    setReview('');
-    setTrailerUrl('');
 
     onClose();
   };
@@ -67,18 +60,7 @@ export default function AddCustomMovieModal({ visible, onClose }: Props) {
           style={styles.modalOverlay}
         >
           <View style={styles.modal}>
-            <Text style={styles.modalTitle}>Dodaj własny film</Text>
-
-            <Text
-              style={{
-                color: '#aaa',
-                marginBottom: 12,
-                fontStyle: 'italic',
-                textAlign: 'center',
-              }}
-            >
-              Ten film będzie oznaczony jako dodany ręcznie
-            </Text>
+            <Text style={styles.modalTitle}>Edytuj film</Text>
 
             <TextInput
               placeholder="Tytuł filmu"
@@ -114,9 +96,7 @@ export default function AddCustomMovieModal({ visible, onClose }: Props) {
             />
 
             <View style={{ marginBottom: 12 }}>
-              <Text style={{ color: '#fff', marginBottom: 6 }}>
-                Twoja ocena
-              </Text>
+              <Text style={{ color: '#fff', marginBottom: 6 }}>Twoja ocena</Text>
               <StarRating rating={rating} onChange={setRating} />
             </View>
 
@@ -136,9 +116,8 @@ export default function AddCustomMovieModal({ visible, onClose }: Props) {
               >
                 <Text style={styles.buttonText}>Anuluj</Text>
               </TouchableOpacity>
-
-              <TouchableOpacity style={styles.saveButton} onPress={submit}>
-                <Text style={styles.buttonText}>Dodaj film</Text>
+              <TouchableOpacity style={styles.saveButton} onPress={saveChanges}>
+                <Text style={styles.buttonText}>Zapisz zmiany</Text>
               </TouchableOpacity>
             </View>
           </View>

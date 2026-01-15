@@ -67,7 +67,6 @@ export default function WatchedScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#121212' }}>
-      {/* 🔹 Górny panel z przyciskiem dodawania i sortowaniem */}
       <View style={styles.topPanel}>
         <TouchableOpacity
           style={styles.addButton}
@@ -105,7 +104,6 @@ export default function WatchedScreen() {
         />
       )}
 
-      {/* 🔹 Modal edycji */}
       {editingMovie && (
         <AddWatchedModal
           visible={true}
@@ -119,7 +117,6 @@ export default function WatchedScreen() {
         />
       )}
 
-      {/* 🔹 Modal dodania własnego filmu */}
       <AddCustomMovieModal
         visible={customModalVisible}
         onClose={() => setCustomModalVisible(false)}

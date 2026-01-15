@@ -6,13 +6,23 @@ import { STORAGE_KEYS } from '../constants/storageKeys';
 
 interface WatchedMoviesContextType {
   watchedMovies: WatchedMovie[];
-  addWatchedMovie: (movie: Movie, rating: number, review?: string) => void;
+
+  addWatchedMovie: (
+    movie: Movie,
+    rating: number,
+    review?: string,
+    options?: {
+      addedByUser?: boolean;
+    }
+  ) => void;
+
   updateWatchedMovie: (
     id: number,
     rating?: number,
     review?: string,
     updates?: Partial<WatchedMovie>
   ) => void;
+
   removeWatchedMovie: (id: number) => void;
 }
 
@@ -26,16 +36,22 @@ export function WatchedMoviesProvider({ children }: { children: ReactNode }) {
   const addWatchedMovie = (
     movie: Movie,
     rating: number,
-    review?: string
+    review?: string,
+    options?: { addedByUser?: boolean }
   ) => {
     const watchedMovie: WatchedMovie = {
       ...movie,
       userRating: rating,
       review,
       watchedAt: new Date().toISOString(),
+      createdAt: Date.now(),
+      addedByUser: options?.addedByUser ?? false,
     };
 
-    setWatchedMovies((prev) => [watchedMovie, ...prev]);
+    setWatchedMovies(prev => {
+      if (prev.some(m => m.id === movie.id)) return prev;
+      return [watchedMovie, ...prev];
+    });
   };
 
   const updateWatchedMovie = (
@@ -47,7 +63,12 @@ export function WatchedMoviesProvider({ children }: { children: ReactNode }) {
     setWatchedMovies((prev) =>
       prev.map((movie) =>
         movie.id === id
-          ? { ...movie, userRating: rating ?? movie.userRating, review: review ?? movie.review, ...updates }
+          ? {
+              ...movie,
+              userRating: rating ?? movie.userRating,
+              review: review ?? movie.review,
+              ...updates,
+            }
           : movie
       )
     );
