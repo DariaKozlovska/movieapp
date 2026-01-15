@@ -1,21 +1,32 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Movie } from '../models/Movie';
 import { getPopularMovies } from '../api/tmdbApi';
 import { useLikedMovies } from '../contexts/LikedMoviesContext';
+import { useWatchedMovies } from '../contexts/WatchedMoviesContext';
 
 export const useSwipeMovies = () => {
-  const [movies, setMovies] = useState<Movie[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [allMovies, setAllMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
 
-  const { addLikedMovie } = useLikedMovies();
+  const { likedMovies, addLikedMovie } = useLikedMovies();
+  const { watchedMovies } = useWatchedMovies();
+
+  const excludedIds = useMemo(
+    () =>
+      new Set<number>([
+        ...likedMovies.map(m => m.id),
+        ...watchedMovies.map(m => m.id),
+      ]),
+    [likedMovies, watchedMovies]
+  );
 
   const fetchMovies = async (pageNumber = 1) => {
     try {
       setLoading(true);
       const data = await getPopularMovies(pageNumber);
-      setMovies(prev =>
+
+      setAllMovies(prev =>
         pageNumber === 1 ? data : [...prev, ...data]
       );
     } catch (e) {
@@ -25,16 +36,26 @@ export const useSwipeMovies = () => {
     }
   };
 
+  // 🔹 GOTOWA KOLEJKA DO SWIPE
+  const swipeMovies = useMemo(() => {
+    return allMovies.filter(movie => !excludedIds.has(movie.id));
+  }, [allMovies, excludedIds]);
+
   const swipeRight = () => {
-    const movie = movies[currentIndex];
+    const movie = swipeMovies[0];
     if (!movie) return;
 
-    addLikedMovie(movie);     // zapis do contextu
-    setCurrentIndex(i => i + 1); // TYLKO index
+    addLikedMovie(movie);
+
+    // 🔥 USUWAMY FILM Z KOLEJKI
+    setAllMovies(prev => prev.filter(m => m.id !== movie.id));
   };
 
   const swipeLeft = () => {
-    setCurrentIndex(i => i + 1);
+    const movie = swipeMovies[0];
+    if (!movie) return;
+
+    setAllMovies(prev => prev.filter(m => m.id !== movie.id));
   };
 
   useEffect(() => {
@@ -42,18 +63,17 @@ export const useSwipeMovies = () => {
   }, []);
 
   useEffect(() => {
-    if (movies.length - currentIndex <= 3 && !loading) {
+    if (swipeMovies.length <= 3 && !loading) {
       const nextPage = page + 1;
       setPage(nextPage);
       fetchMovies(nextPage);
     }
-  }, [currentIndex, movies]);
+  }, [swipeMovies, loading]);
 
   return {
-    movies,
-    currentIndex,
+    movies: swipeMovies,
+    loading,
     swipeLeft,
     swipeRight,
-    loading,
   };
 };

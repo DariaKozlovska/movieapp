@@ -3,16 +3,10 @@ import { useSwipeMovies } from '../../hooks/useSwipeMovies';
 import SwipeCard from '../../components/SwipeCard';
 
 export default function SwipeScreen() {
-  const {
-    movies,
-    currentIndex,
-    swipeLeft,
-    swipeRight,
-    loading,
-  } = useSwipeMovies();
+  const { movies, swipeLeft, swipeRight, loading } = useSwipeMovies();
 
-  const currentMovie = movies[currentIndex];
-  const nextMovie = movies[currentIndex + 1];
+  const currentMovie = movies[0];
+  const nextMovie = movies[1];
 
   if (loading && movies.length === 0) {
     return (
@@ -33,11 +27,7 @@ export default function SwipeScreen() {
   return (
     <View style={styles.container}>
       {nextMovie && (
-        <SwipeCard
-          movie={nextMovie}
-          disabled
-          isNextCard
-        />
+        <SwipeCard movie={nextMovie} disabled isNextCard />
       )}
 
       <SwipeCard
