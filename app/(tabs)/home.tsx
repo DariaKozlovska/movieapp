@@ -1,9 +1,13 @@
 import { View, StyleSheet, Text } from 'react-native';
 import { useSwipeMovies } from '../../hooks/useSwipeMovies';
+import { useMovies } from '../../hooks/useMovies';
 import SwipeCard from '../../components/SwipeCard';
+import GenreSelector from '../../components/GenreSelector';
+import { GENRES } from '../../constants/genres';
 
 export default function SwipeScreen() {
   const { movies, swipeLeft, swipeRight, loading } = useSwipeMovies();
+  const { selectedGenre, setSelectedGenre } = useMovies();
 
   const currentMovie = movies[0];
   const nextMovie = movies[1];
@@ -26,6 +30,11 @@ export default function SwipeScreen() {
 
   return (
     <View style={styles.container}>
+      <GenreSelector
+        genres={GENRES}
+        selectedGenre={selectedGenre}
+        onSelectGenre={setSelectedGenre}
+      />
       {nextMovie && (
         <SwipeCard movie={nextMovie} disabled isNextCard />
       )}

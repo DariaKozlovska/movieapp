@@ -1,34 +1,42 @@
-import { Stack } from 'expo-router';
+import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { StyleSheet } from 'react-native';
-import { ThemeProvider, DarkTheme } from '@react-navigation/native';
+import { StyleSheet, useColorScheme } from 'react-native';
+import { Slot } from 'expo-router';
+import { useFonts } from 'expo-font';
+import * as SplashScreen from 'expo-splash-screen';
+
 import { LikedMoviesProvider } from '../contexts/LikedMoviesContext';
 import { WatchedMoviesProvider } from '../contexts/WatchedMoviesContext';
-import { Background } from '@react-navigation/elements';
+
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const colorScheme = useColorScheme();
+
+  const [loaded] = useFonts({
+    IntroBlack: require('../assets/fonts/IntroBlack.otf'),
+    IntroBold: require('../assets/fonts/IntroBold.otf'),
+  });
+
+  useEffect(() => {
+    if (loaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded]);
+
+  if (!loaded) return null;
+
   return (
-    <ThemeProvider value={DarkTheme}>
-      <WatchedMoviesProvider>
-        <LikedMoviesProvider>
-            <GestureHandlerRootView style={styles.container}>
-              <Stack screenOptions={{ headerShown: true }} >
-                <Stack.Screen name="(tabs)" options={{ title: 'Filmy' }} />
-                <Stack.Screen
-                  name="movie/[id]"
-                  options={{ title: 'Szczegóły filmu' }}
-                />
-              </Stack>
-            </GestureHandlerRootView>
-        </LikedMoviesProvider>
-      </WatchedMoviesProvider>
-    </ThemeProvider>
+    <GestureHandlerRootView style={styles.container}>
+      <LikedMoviesProvider>
+        <WatchedMoviesProvider>
+          <Slot />
+        </WatchedMoviesProvider>
+      </LikedMoviesProvider>
+    </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#121212',
-  },
+  container: { flex: 1 },
 });

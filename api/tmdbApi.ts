@@ -31,6 +31,26 @@ export const getPopularMovies = async (
   return response.data.results;
 };
 
+export const getMovies = async (
+  genreId: number | null,
+  page: number = 1
+): Promise<Movie[]> => {
+  const endpoint = genreId
+    ? `${TMDB_BASE_URL}/discover/movie`
+    : `${TMDB_BASE_URL}/movie/popular`;
+
+  const response = await axios.get<TMDBResponse>(endpoint, {
+    params: {
+      api_key: TMDB_API_KEY,
+      language: 'pl-PL',
+      page,
+      ...(genreId && { with_genres: genreId }),
+    },
+  });
+
+  return response.data.results;
+};
+
 export const getMovieTrailer = async (movieId: number) => {
   const response = await axios.get<TMDBVideosResponse>(
     `${TMDB_BASE_URL}/movie/${movieId}/videos`,
