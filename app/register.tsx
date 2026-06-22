@@ -7,9 +7,10 @@ import ScreenContainer from '../components/Screen/ScreenContainer';
 import HelpButton from '@/components/Button/HelpButton';
 import AppLogo from '@/components/Logo/AppLogo';
 import { Fonts } from '@/constants/fonts';
-
-import { Color, router } from 'expo-router';
 import { Colors } from '@/constants/colors';
+
+import { router } from 'expo-router';
+import { registerViewModel } from '@/viewModels/registerViewModel';
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
@@ -17,13 +18,27 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
 
-  const handleRegister = () => {
-    console.log('REGISTER:', {
-      name,
-      email,
-      password,
-      repeatPassword,
-    });
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleRegister = async () => {
+    setError(null);
+    setLoading(true);
+
+    try {
+      await registerViewModel.register({
+        name,
+        email,
+        password,
+        repeatPassword,
+      });
+
+      router.replace('/login');
+    } catch (e: any) {
+      setError(e.message || 'Wystąpił błąd');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,44 +62,44 @@ export default function RegisterScreen() {
             onChangeText={setName}
           />
 
-          <View style={{ height: 34 }} />
+          <View style={{ height: 38 }} />
 
           <AppInput
             placeholder="E-mail"
             value={email}
             onChangeText={setEmail}
           />
-          <Text style={styles.error}>Pole jest wymagane</Text>
 
-          <View style={{ height: 14 }} />
-        
+          <View style={{ height: 38 }} />
+
           <AppInput
             placeholder="Hasło"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
           />
-          <Text style={styles.error}>Pole jest wymagane</Text>
 
-          <View style={{ height: 14 }} />
+          <View style={{ height: 38 }} />
+
           <AppInput
             placeholder="Powtórz hasło"
             value={repeatPassword}
             onChangeText={setRepeatPassword}
             secureTextEntry
           />
-          <Text style={styles.error}>Pole jest wymagane</Text>
 
-          <View style={{ height: 24 }} />
+          {error && <Text style={styles.error}>{error}</Text>}
+
+          <View style={{ height: 38 }} />
 
           <AppButton
-            title="Zarejestruj się"
+            title={loading ? 'Tworzenie konta...' : 'Zarejestruj się'}
             variant="success"
             onPress={handleRegister}
           />
         </View>
 
-        <View style={{ height: 50 }} />
+        <View style={{ height: 70 }} />
 
         <Text style={styles.subtitle}>
           Masz już konto?{' '}

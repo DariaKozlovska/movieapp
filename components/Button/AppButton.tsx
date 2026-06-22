@@ -29,8 +29,8 @@ export default function AppButton({
         {
           backgroundColor:
             variant === 'primary'
-              ? Colors.primary
-              : Colors.success,
+              ? Colors.red
+              : Colors.green,
         },
         style,
       ]}
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
   },
 
   text: {
-    color: '#fff',
+    color: Colors.text,
     fontFamily: Fonts.bold,
     fontSize: 20,
 

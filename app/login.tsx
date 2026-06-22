@@ -10,23 +10,54 @@ import { Fonts } from '@/constants/fonts';
 
 import { router } from 'expo-router';
 import { Colors } from '@/constants/colors';
+import { loginViewModel } from '@/viewModels/loginViewModel';
+
+import { useAuth } from '@/contexts/AuthContext';
+import { authViewModel } from '@/viewModels/authViewModel';
+
+import Notification from '@/components/Notifications/EmailNotification';
 
 export default function LoginScreen() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    console.log('LOGIN:', { username, password });
+  const [notification, setNotification] = useState({
+    visible: false,
+    message: '',
+    type: 'success' as 'success' | 'error',
+  });
+
+  const handleLogin = async () => {
+    const result = await loginViewModel.login(username, password);
+
+    setNotification({
+      visible: true,
+      message: result.message,
+      type: result.type,
+    });
+
+    if (result.success) {
+      setTimeout(() => {
+        router.replace('/(tabs)/home');
+      }, 800);
+    }
   };
 
   return (
     <ScreenContainer>
+      <Notification
+        visible={notification.visible}
+        message={notification.message}
+        type={notification.type}
+      />
+
       <HelpButton />
+
       <View style={styles.container}>
 
         <View style={{ height: 120 }} />
 
-        <View style={styles.content} >
+        <View style={styles.content}>
           <AppLogo />
           <Text style={styles.title}>Witamy z powrotem</Text>
         </View>
@@ -49,7 +80,43 @@ export default function LoginScreen() {
             secureTextEntry
           />
 
-          <Text style={styles.remindtext}>
+          <Text
+            style={styles.remindtext}
+            onPress={async () => {
+              try {
+                if (!username) {
+                  setNotification({
+                    visible: true,
+                    message: 'Podaj email',
+                    type: 'error',
+                  });
+                  return;
+                }
+
+                const res = await authViewModel.resetPassword(username);
+
+                setNotification({
+                  visible: true,
+                  message: res.message,
+                  type: 'success',
+                });
+
+              } catch (e: any) {
+                setNotification({
+                  visible: true,
+                  message: e.message,
+                  type: 'error',
+                });
+              }
+
+              setTimeout(() => {
+                setNotification((prev) => ({
+                  ...prev,
+                  visible: false,
+                }));
+              }, 3000);
+            }}
+          >
             Nie pamiętasz hasła?
           </Text>
 
@@ -114,7 +181,7 @@ const styles = StyleSheet.create({
 
   subtitle: {
     marginTop: 16,
-    color: '#fff',
+    color: Colors.text,
     fontFamily: Fonts.regular,
     fontSize: 20,
     textAlign: 'center',

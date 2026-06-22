@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
+import { Colors } from '@/constants/colors';
 
 export default function HelpButton() {
   return (
@@ -25,7 +26,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
 
     borderWidth: 2,
-    borderColor: '#fff',
+    borderColor: Colors.text,
 
     justifyContent: 'center',
     alignItems: 'center',
@@ -34,7 +35,7 @@ const styles = StyleSheet.create({
   },
 
   text: {
-    color: '#fff',
+    color: Colors.text,
     fontWeight: '700',
     fontSize: 18,
   },

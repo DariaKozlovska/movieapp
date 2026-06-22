@@ -22,6 +22,9 @@ a dalej naley umieścić kluch do pliku .env w głównym folderze projektu. EXPO
    npx expo install expo-font
    npx expo install @expo/vector-icons
    npx expo install react-native-safe-area-context
+
+   dla firebase 
+   npm install firebase
    ``` 
 
 3. Urochom aplikacje 
