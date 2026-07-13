@@ -53,7 +53,7 @@ export default function SwipeCard({
 
   useEffect(() => {
     translateX.value = 0;
-  }, [movie.id]);
+  }, [movie.id, translateX]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
@@ -77,7 +77,7 @@ export default function SwipeCard({
         : 'transparent';
 
     return {
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
       backgroundColor: color,
       opacity,
       borderRadius: 20,
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   inactiveOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(0,0,0,0.3)',
   },
   image: {

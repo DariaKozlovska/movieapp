@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -39,14 +39,13 @@ export default function MovieDetailsScreen() {
   const [rating, setRating] = useState<number>(watchedMovie?.userRating ?? 3);
   const [review, setReview] = useState<string>(watchedMovie?.review ?? '');
   const [modalVisible, setModalVisible] = useState(false);
-  const [editCustomModalVisible, setEditCustomModalVisible] = useState(false);
 
   useEffect(() => {
     if (watchedMovie) {
       setRating(watchedMovie.userRating ?? 3);
       setReview(watchedMovie.review ?? '');
     }
-  }, [watchedMovie?.id]);
+  }, [watchedMovie]);
 
   if (!movie) {
     return (

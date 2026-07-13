@@ -32,7 +32,6 @@ export default function EditCustomMovieModal({ visible, movie, onClose }: Props)
   const [review, setReview] = useState(movie.review ?? '');
 
   useEffect(() => {
-    // reset pól przy zmianie filmu
     setTitle(movie.title);
     setPoster(movie.poster_path ?? '');
     setOverview(movie.overview ?? '');

@@ -12,7 +12,6 @@ import { router } from 'expo-router';
 import { Colors } from '@/constants/colors';
 import { loginViewModel } from '@/viewModels/loginViewModel';
 
-import { useAuth } from '@/contexts/AuthContext';
 import { authViewModel } from '@/viewModels/authViewModel';
 
 import Notification from '@/components/Notifications/EmailNotification';

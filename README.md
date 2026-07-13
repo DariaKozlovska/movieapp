@@ -25,6 +25,8 @@ a dalej naley umieścić kluch do pliku .env w głównym folderze projektu. EXPO
 
    dla firebase 
    npm install firebase
+
+   npx expo install expo-asset expo-constants
    ``` 
 
 3. Urochom aplikacje 

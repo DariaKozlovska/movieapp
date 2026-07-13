@@ -1,7 +1,7 @@
 import { Colors } from '@/constants/colors';
 import { Fonts } from '@/constants/fonts';
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Animated, StyleSheet, Text } from 'react-native';
 
 type Props = {
   visible: boolean;
@@ -18,56 +18,50 @@ export default function Notification({
   duration = 2500,
   onHide,
 }: Props) {
-  const opacity = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(-20)).current;
-
-  const [show, setShow] = useState(false);
+  const opacity = useRef(new Animated.Value(0));
+  const translateY = useRef(new Animated.Value(-20));
 
   useEffect(() => {
-    let timer: any;
-
-    if (visible) {
-      setShow(true);
-
-      Animated.parallel([
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-        Animated.timing(translateY, {
-          toValue: 0,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-      ]).start();
-
-      // 🔥 AUTO HIDE TUTAJ (JEDYNE MIEJSCE)
-      timer = setTimeout(() => {
-        Animated.parallel([
-          Animated.timing(opacity, {
-            toValue: 0,
-            duration: 200,
-            useNativeDriver: true,
-          }),
-          Animated.timing(translateY, {
-            toValue: -20,
-            duration: 200,
-            useNativeDriver: true,
-          }),
-        ]).start(() => {
-          setShow(false);
-          onHide?.();
-        });
-      }, duration);
+    if (!visible) {
+      return;
     }
 
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
-  }, [visible, message]);
+    Animated.parallel([
+      Animated.timing(opacity.current, {
+        toValue: 1,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+      Animated.timing(translateY.current, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+    ]).start();
 
-  if (!show) return null;
+    const timer = setTimeout(() => {
+      Animated.parallel([
+        Animated.timing(opacity.current, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateY.current, {
+          toValue: -20,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        onHide?.();
+      });
+    }, duration);
+
+    return () => clearTimeout(timer);
+  }, [visible, duration, onHide]);
+
+  if (!visible) {
+    return null;
+  }
 
   return (
     <Animated.View
@@ -75,8 +69,8 @@ export default function Notification({
         styles.container,
         type === 'success' ? styles.success : styles.error,
         {
-          opacity,
-          transform: [{ translateY }],
+          opacity: opacity.current,
+          transform: [{ translateY: translateY.current }],
         },
       ]}
     >
@@ -96,15 +90,12 @@ const styles = StyleSheet.create({
     zIndex: 999,
     elevation: 10,
   },
-
   success: {
     backgroundColor: Colors.green,
   },
-
   error: {
     backgroundColor: Colors.red,
   },
-
   text: {
     color: Colors.text,
     fontSize: 18,

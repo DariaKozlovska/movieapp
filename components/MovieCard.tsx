@@ -1,11 +1,9 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { TMDB_IMAGE_URL } from '../constants/config';
 import { Movie } from '../models/Movie';
 import { WatchedMovie } from '../models/WatchedMovie';
 import StarRating from './StarRating';
-import { Alert } from 'react-native';
 
 interface Props {
   movie: Movie | WatchedMovie;
@@ -16,8 +14,6 @@ interface Props {
   onPress?: () => void;
   isWatched?: boolean; 
 }
-
-const MAX_REVIEW_LENGTH = 100;
 
 export default function MovieCard({
   movie,
@@ -126,7 +122,7 @@ export default function MovieCard({
           userReview ? (
           <View>
             <Text style={styles.review} numberOfLines={3}>
-              "{userReview}"
+              {'"'}{userReview}{'"'}
             </Text>
 {/* 
             {onEdit && (

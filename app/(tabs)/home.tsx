@@ -4,10 +4,20 @@ import { useMovies } from '../../hooks/useMovies';
 import SwipeCard from '../../components/SwipeCard';
 import GenreSelector from '../../components/GenreSelector';
 import { GENRES } from '../../constants/genres';
+import { Colors } from '@/constants/colors';
 
 export default function SwipeScreen() {
-  const { movies, swipeLeft, swipeRight, loading } = useSwipeMovies();
-  const { selectedGenre, setSelectedGenre } = useMovies();
+  const {
+    selectedGenre,
+    setSelectedGenre,
+  } = useMovies();
+
+  const {
+    movies,
+    swipeLeft,
+    swipeRight,
+    loading,
+  } = useSwipeMovies(selectedGenre);
 
   const currentMovie = movies[0];
   const nextMovie = movies[1];
@@ -30,38 +40,63 @@ export default function SwipeScreen() {
 
   return (
     <View style={styles.container}>
-      <GenreSelector
-        genres={GENRES}
-        selectedGenre={selectedGenre}
-        onSelectGenre={setSelectedGenre}
-      />
-      {nextMovie && (
-        <SwipeCard movie={nextMovie} disabled isNextCard />
-      )}
+      {/* <Text style={styles.header}>Filmy</Text> */}
+      <View style={styles.selectorContainer}>
+        <GenreSelector
+          genres={GENRES}
+          selectedGenre={selectedGenre}
+          onSelectGenre={setSelectedGenre}
+        />
+      </View>
 
-      <SwipeCard
-        movie={currentMovie}
-        onSwipeLeft={swipeLeft}
-        onSwipeRight={swipeRight}
-      />
+      <View style={styles.cardsContainer}>
+        {nextMovie && (
+          <SwipeCard
+            movie={nextMovie}
+            disabled
+            isNextCard
+          />
+        )}
+
+        <SwipeCard
+          movie={currentMovie}
+          onSwipeLeft={swipeLeft}
+          onSwipeRight={swipeRight}
+        />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: Colors.background,
+  },
+
+  selectorContainer: {
+    alignItems: 'center',
+    marginTop: 70,
+    zIndex: 1000,
+  },
+
+
+  cardsContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
+
   loading: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: Colors.background,
   },
+
   text: {
-    color: '#fff',
+    color: Colors.text,
     fontSize: 18,
   },
 });
