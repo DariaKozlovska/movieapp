@@ -2,15 +2,17 @@ import { View, StyleSheet, Text } from 'react-native';
 import { useSwipeMovies } from '../../hooks/useSwipeMovies';
 import { useMovies } from '../../hooks/useMovies';
 import SwipeCard from '../../components/SwipeCard';
-import GenreSelector from '../../components/GenreSelector';
+import Selector from '../../components/Selectors/Selector';
 import { GENRES } from '../../constants/genres';
 import { Colors } from '@/constants/colors';
+import Title from '@/components/Text/title';
 
 export default function SwipeScreen() {
   const {
     selectedGenre,
     setSelectedGenre,
   } = useMovies();
+
 
   const {
     movies,
@@ -40,12 +42,13 @@ export default function SwipeScreen() {
 
   return (
     <View style={styles.container}>
-      {/* <Text style={styles.header}>Filmy</Text> */}
+      <Title title="Filmy" />
       <View style={styles.selectorContainer}>
-        <GenreSelector
-          genres={GENRES}
-          selectedGenre={selectedGenre}
-          onSelectGenre={setSelectedGenre}
+        <Selector
+          options={GENRES}
+          selectedOption={selectedGenre}
+          onSelectOption={setSelectedGenre}
+          placeholder="Wybierz kategorię"
         />
       </View>
 
@@ -77,10 +80,16 @@ const styles = StyleSheet.create({
 
   selectorContainer: {
     alignItems: 'center',
-    marginTop: 70,
     zIndex: 1000,
   },
 
+  header: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: Colors.text,
+    textAlign: 'center',
+    marginTop: 56,
+  },
 
   cardsContainer: {
     flex: 1,

@@ -5,4 +5,5 @@ export const Colors = {
   text: '#FFFFFF',
   border: '#6F6F6F',
   placeholder: '#23211E',
+  cardBackground: '#23211E',
 };

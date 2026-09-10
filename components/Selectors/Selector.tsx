@@ -5,53 +5,67 @@ import {
   Text,
   StyleSheet,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
-interface Genre {
+import { Colors } from '../../constants/colors';
+import { Fonts } from '../../constants/fonts';
+
+export interface SelectorOption {
   id: number | null;
   name: string;
 }
 
-interface Props {
-  genres: Genre[];
-  selectedGenre: number | null;
-  onSelectGenre: (genreId: number | null) => void;
-}
+type Props = {
+  options: SelectorOption[];
+  selectedOption: number | string | null;
+  onSelectOption: (optionId: number | null) => void;
+  placeholder?: string;
+};
 
-export default function GenreSelector({
-  genres,
-  selectedGenre,
-  onSelectGenre,
+export default function Selector({
+  options,
+  selectedOption,
+  onSelectOption,
+  placeholder = 'Wybierz kategorię',
 }: Props) {
   const [opened, setOpened] = useState(false);
 
   const selected =
-    genres.find((g) => g.id === selectedGenre)?.name ||
-    'Wybierz kategorię';
+    options.find((option) => option.id === selectedOption)?.name ||
+    placeholder;
 
   return (
     <View style={styles.container}>
       <TouchableOpacity
         style={styles.selector}
+        activeOpacity={1}
         onPress={() => setOpened((prev) => !prev)}
       >
         <Text style={styles.selectorText}>
           {selected}
         </Text>
+
+        <Ionicons
+          name={opened ? 'chevron-up' : 'chevron-down'}
+          size={20}
+          color={Colors.text}
+        />
       </TouchableOpacity>
 
       {opened && (
         <View style={styles.dropdown}>
-          {genres.map((genre) => (
+          {options.map((option) => (
             <TouchableOpacity
-              key={genre.name}
+              key={String(option.id)}
               style={styles.option}
+              activeOpacity={1}
               onPress={() => {
-                onSelectGenre(genre.id);
+                onSelectOption(option.id);
                 setOpened(false);
               }}
             >
               <Text style={styles.optionText}>
-                {genre.name}
+                {option.name}
               </Text>
             </TouchableOpacity>
           ))}
@@ -67,41 +81,45 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     position: 'relative',
     zIndex: 1000,
+    marginTop: 14,
   },
 
   selector: {
     width: 150,
-    height: 50,
+    height: 40,
 
-    borderRadius: 14,
+    borderRadius: 12,
 
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
 
-    backgroundColor: '#23211E',
+    backgroundColor: Colors.cardBackground,
 
     borderWidth: 1,
-    borderColor: '#6F6F6F',
+    borderColor: Colors.border,
+
+    gap: 8,
   },
 
   selectorText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    color: Colors.text,
+    fontSize: 18,
+    fontFamily: Fonts.bold,
   },
 
   dropdown: {
     position: 'absolute',
-    top: 58,
+    top: 48,
 
     width: 150,
 
-    backgroundColor: '#23211E',
+    backgroundColor: Colors.cardBackground,
 
     borderRadius: 14,
 
     borderWidth: 1,
-    borderColor: '#6F6F6F',
+    borderColor: Colors.border,
 
     overflow: 'hidden',
 
@@ -114,7 +132,9 @@ const styles = StyleSheet.create({
   },
 
   optionText: {
-    color: '#fff',
+    color: Colors.text,
     textAlign: 'center',
+    fontFamily: Fonts.regular,
+    fontSize: 16,
   },
 });

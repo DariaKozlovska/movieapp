@@ -1,8 +1,8 @@
 import React, { ReactNode } from 'react';
 import {
-  SafeAreaView,
   StyleSheet,
 } from 'react-native';
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from '../../constants/colors';
 
 type Props = {
