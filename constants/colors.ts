@@ -7,4 +7,5 @@ export const Colors = {
   placeholder: '#23211E',
   cardBackground: '#23211E',
   disactiveTab: '#B7B7B7',
+  black: '#000000',
 };

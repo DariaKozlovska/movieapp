@@ -17,11 +17,11 @@ export default function HelpButton() {
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    top: 60,
+    top: 54,
     right: 20,
 
-    width: 36,
-    height: 36,
+    width: 32,
+    height: 32,
 
     borderRadius: 18,
 

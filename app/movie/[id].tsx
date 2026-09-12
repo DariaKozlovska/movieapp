@@ -18,8 +18,38 @@ import { getMovieTrailer } from '../../api/tmdbApi';
 import { TMDB_IMAGE_URL } from '../../constants/config';
 import AddWatchedModal from '../../components/AddWatchedModal';
 import EditCustomMovieModal from '../../components/EditCustomMovieModal';
+import { Colors } from '@/constants/colors';
+import HelpButton from '@/components/Button/HelpButton';
+import Title from '@/components/Text/title';
+import { router } from 'expo-router';
+import { Fonts } from '@/constants/fonts';
+import { GENRES } from '@/constants/genres';
+import AppButton from '@/components/Button/AppButton';
+import LikeButton from '@/components/Button/LikeButton';
+import { Movie } from '@/models/Movie';
+import { WatchedMovie } from '@/models/WatchedMovie';
+import { BackButton } from '@/components/Button/BackButton';
 
 const { height } = Dimensions.get('window');
+
+function toMovie(source: Movie | WatchedMovie, genre: string): Movie {
+  return {
+    id: source.id,
+    title: source.title,
+    overview: source.overview ?? '',
+    poster_path: source.poster_path ?? '',
+    release_date: source.release_date ?? '',
+    vote_average:
+      'vote_average' in source
+        ? source.vote_average
+        : 'userRating' in source
+        ? source.userRating
+        : 0,
+    trailer_url: source.trailer_url,
+    genre_ids: 'genre_ids' in source ? source.genre_ids : undefined,
+    genre,
+  };
+}
 
 export default function MovieDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -33,27 +63,17 @@ export default function MovieDetailsScreen() {
 
   const movie = watchedMovie || likedMovie || apiMovie;
 
-  const isInWatched = !!watchedMovie;
-  const canEditCustom = watchedMovie?.addedByUser === true;
-
-  const [rating, setRating] = useState<number>(watchedMovie?.userRating ?? 3);
-  const [review, setReview] = useState<string>(watchedMovie?.review ?? '');
-  const [modalVisible, setModalVisible] = useState(false);
-
-  useEffect(() => {
-    if (watchedMovie) {
-      setRating(watchedMovie.userRating ?? 3);
-      setReview(watchedMovie.review ?? '');
-    }
-  }, [watchedMovie]);
-
   if (!movie) {
     return (
       <View style={styles.center}>
-        <Text style={{ color: '#fff' }}>Nie znaleziono filmu</Text>
+        <Text style={{ color: Colors.text }}>Nie znaleziono filmu</Text>
       </View>
     );
   }
+
+  const genreNames =
+    movie.genre_ids?.map((gid) => GENRES.find((g) => g.id === gid)?.name).filter(Boolean) ?? [];
+  const genreLabel = genreNames.join(', ');
 
   const posterUri = movie.poster_path
     ? movie.poster_path.startsWith('http')
@@ -74,105 +94,58 @@ export default function MovieDetailsScreen() {
     }
   };
 
-  const saveChanges = () => {
-    if (isInWatched && !canEditCustom) {
-      // tylko update rating/review dla zwykłego filmu
-      updateWatchedMovie(movie.id, rating, review);
-    } else if (!isInWatched) {
-      // dodanie filmu do obejrzanych
-      addWatchedMovie(
-        {
-          id: movie.id,
-          title: movie.title,
-          poster_path: movie.poster_path ?? '',
-          overview: movie.overview ?? '',
-          release_date: movie.release_date ?? '',
-          vote_average: 'vote_average' in movie ? movie.vote_average ?? 0 : 0,
-          trailer_url: movie.trailer_url,
-        },
-        rating,
-        review
-      );
-    }
-    setModalVisible(false);
-    Alert.alert('Zapisano zmiany');
-  };
-
   return (
     <ScrollView
       contentContainerStyle={[styles.container, { minHeight: height }]}
-      style={{ backgroundColor: '#121212' }}
+      style={{ backgroundColor: Colors.background }}
     >
+      <HelpButton />
+      <Title title={movie.title} style={{ marginTop: 70 }} />
+
+      <BackButton />
+
       {posterUri ? (
-        <Image source={{ uri: posterUri }} style={styles.image} />
+        <View style={styles.posterWrapper}>
+          <Image source={{ uri: posterUri }} style={styles.image} />
+          <View style={styles.likeButtonOverlay}>
+            <LikeButton movie={toMovie(movie, genreLabel)} />
+          </View>
+        </View>
       ) : (
         <View style={[styles.image, styles.noImage]}>
           <Text style={styles.noImageText}>Brak okładki</Text>
         </View>
       )}
 
-      <Text style={styles.title}>{movie.title}</Text>
-
-      <Text style={styles.rating}>
-        {(watchedMovie?.userRating ?? ('vote_average' in movie ? movie.vote_average ?? 0 : 0)).toFixed(1)}
-      </Text>
+      <View style={styles.rating}>
+        <Text style={{ fontSize: 20, color: Colors.text, marginRight: 8, fontFamily: Fonts.bold }}>
+          {(watchedMovie?.userRating ?? ('vote_average' in movie ? movie.vote_average ?? 0 : 0)).toFixed(1)}
+        </Text>
+        <Image source={require('@/assets/images/Star.png')} style={{ width: 26, height: 26 }} />
+        <Text style={{ fontSize: 20, color: Colors.text, marginLeft: 8, fontFamily: Fonts.bold }}>
+          {genreLabel}
+        </Text>
+      </View>
 
       <Text style={styles.overview}>{movie.overview ?? 'Brak opisu'}</Text>
 
-      {movie.release_date && <Text style={styles.date}>Premiera: {movie.release_date}</Text>}
-
-      <TouchableOpacity style={styles.trailerButton} onPress={openTrailer}>
-        <Text style={styles.trailerText}>Zobacz zwiastun</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[styles.trailerButton, { backgroundColor: 'rgba(0,255,0,0.6)' }]}
-        onPress={() => setModalVisible(true)}
-      >
-        <Text style={styles.trailerText}>
-          {isInWatched ? (canEditCustom ? 'Edytuj film' : 'Edytuj ocenę') : 'Dodaj do obejrzanych'}
-        </Text>
-      </TouchableOpacity>
-
-      {canEditCustom && <Text style={styles.customInfo}>Film dodany ręcznie</Text>}
-
-      {/* Modal dla zwykłego filmu (tylko rating/review) */}
-      {!canEditCustom && (
-        <AddWatchedModal
-          visible={modalVisible}
-          title={movie.title}
-          rating={rating}
-          review={review}
-          onChangeRating={setRating}
-          onChangeReview={setReview}
-          onCancel={() => setModalVisible(false)}
-          onSave={saveChanges}
-        />
-      )}
-
-      {/* Modal dla filmu dodanego przez użytkownika (pełna edycja) */}
-      {canEditCustom && watchedMovie && (
-        <EditCustomMovieModal
-          visible={modalVisible}
-          movie={watchedMovie}
-          onClose={() => setModalVisible(false)}
-        />
-      )}
+      <AppButton title={'Zobacz zwiastun'} onPress={openTrailer} />
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#121212' },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.background },
   container: { padding: 16, alignItems: 'center' },
-  image: { width: '100%', height: 400, borderRadius: 16, marginBottom: 16 },
-  noImage: { backgroundColor: '#333', justifyContent: 'center', alignItems: 'center' },
-  noImageText: { color: '#888' },
-  title: { fontSize: 26, fontWeight: 'bold', color: '#fff', textAlign: 'center' },
-  rating: { fontSize: 18, color: '#fff', marginBottom: 12 },
-  overview: { fontSize: 16, color: '#ddd', textAlign: 'justify', marginBottom: 16 },
-  date: { fontSize: 14, color: '#888' },
-  trailerButton: { backgroundColor: '#e50914', paddingVertical: 14, borderRadius: 12, width: '90%', alignItems: 'center', marginTop: 16 },
-  trailerText: { color: '#fff', fontSize: 18, fontWeight: '600' },
-  customInfo: { marginTop: 12, color: '#aaa', fontStyle: 'italic' },
+  posterWrapper: { width: '100%', marginVertical: 16 },
+  image: { width: '100%', height: 400, borderRadius: 16 },
+  likeButtonOverlay: { position: 'absolute', bottom: 0, right: 0},
+  noImage: { backgroundColor: Colors.placeholder, justifyContent: 'center', alignItems: 'center' },
+  noImageText: { color: Colors.disactiveTab },
+  rating: { marginBottom: 12, flexDirection: 'row', alignItems: 'flex-end' },
+  overview: { fontSize: 20, color: Colors.text, textAlign: 'justify', marginBottom: 16, fontFamily: Fonts.regular },
+  date: { fontSize: 14, color: Colors.disactiveTab },
+  trailerButton: { backgroundColor: Colors.red, paddingVertical: 14, borderRadius: 12, width: '90%', alignItems: 'center', marginTop: 16 },
+  trailerText: { color: Colors.text, fontSize: 18, fontWeight: '600' },
+  customInfo: { marginTop: 12, color: Colors.disactiveTab, fontStyle: 'italic' },
 });
