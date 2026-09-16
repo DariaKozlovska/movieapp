@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Movie } from '../models/Movie';
 import { getMovies } from '../api/tmdbApi';
 
@@ -8,23 +8,23 @@ export const useMovies = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedGenre, setSelectedGenre] = useState<number | null>(null);
 
-  const fetchMovies = async () => {
+  const fetchMovies = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
       const data = await getMovies(selectedGenre);
       setMovies(data);
-    } catch (err) {
+    } catch {
       setError('Nie udało się pobrać filmów');
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedGenre]);
 
   useEffect(() => {
     fetchMovies();
-  }, [selectedGenre]);
+  }, [fetchMovies]);
 
   return {
     movies,

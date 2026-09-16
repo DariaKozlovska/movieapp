@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Movie } from '../models/Movie';
 import { getMovies } from '../api/tmdbApi';
 import { useLikedMovies } from '../contexts/LikedMoviesContext';
@@ -23,26 +23,29 @@ export const useSwipeMovies = (
     [likedMovies, watchedMovies]
   );
 
-  const fetchMovies = async (pageNumber = 1) => {
-    try {
-      setLoading(true);
+  const fetchMovies = useCallback(
+    async (pageNumber = 1) => {
+      try {
+        setLoading(true);
 
-      const data = await getMovies(
-        selectedGenre,
-        pageNumber
-      );
+        const data = await getMovies(
+          selectedGenre,
+          pageNumber
+        );
 
-      setAllMovies((prev) =>
-        pageNumber === 1
-          ? data
-          : [...prev, ...data]
-      );
-    } catch (e) {
-      console.log('Błąd pobierania filmów', e);
-    } finally {
-      setLoading(false);
-    }
-  };
+        setAllMovies((prev) =>
+          pageNumber === 1
+            ? data
+            : [...prev, ...data]
+        );
+      } catch (e) {
+        console.log('Błąd pobierania filmów', e);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [selectedGenre]
+  );
 
   const swipeMovies = useMemo(() => {
     return allMovies.filter(
@@ -75,19 +78,16 @@ export const useSwipeMovies = (
   useEffect(() => {
     setPage(1);
     fetchMovies(1);
-  }, [selectedGenre]);
+  }, [selectedGenre, fetchMovies]);
 
   useEffect(() => {
-    if (
-      swipeMovies.length <= 3 &&
-      !loading
-    ) {
+    if (swipeMovies.length <= 3 && !loading) {
       const nextPage = page + 1;
 
       setPage(nextPage);
       fetchMovies(nextPage);
     }
-  }, [swipeMovies, loading]);
+  }, [swipeMovies, loading, page, fetchMovies]);
 
   return {
     movies: swipeMovies,

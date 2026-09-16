@@ -1,18 +1,16 @@
-import { Movie } from './Movie';
-
 export interface WatchedMovie {
   id: number;
   title: string;
   poster_path?: string;
 
-  userRating: number; 
+  userRating: number;
   review?: string;
   watchedAt: string;
 
   overview?: string;
   trailer_url?: string;
 
-  addedByUser?: boolean; 
+  addedByUser?: boolean;
   createdAt?: number;
   release_date?: string;
 }
