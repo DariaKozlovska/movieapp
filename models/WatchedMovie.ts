@@ -13,4 +13,7 @@ export interface WatchedMovie {
   addedByUser?: boolean;
   createdAt?: number;
   release_date?: string;
+
+  genre_ids?: number[];
+  genre?: string;
 }

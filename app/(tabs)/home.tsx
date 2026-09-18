@@ -6,6 +6,8 @@ import Selector from '../../components/Selectors/Selector';
 import { GENRES } from '../../constants/genres';
 import { Colors } from '@/constants/colors';
 import Title from '@/components/Text/title';
+import HelpButton from '@/components/Button/HelpButton';
+import { SearchButton } from '@/components/Button/SearchButton';
 
 export default function SwipeScreen() {
   const {
@@ -42,6 +44,8 @@ export default function SwipeScreen() {
 
   return (
     <View style={styles.container}>
+      <HelpButton />
+      <SearchButton />
       <Title title="Filmy" />
       <View style={styles.selectorContainer}>
         <Selector

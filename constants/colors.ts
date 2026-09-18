@@ -6,4 +6,6 @@ export const Colors = {
   border: '#6F6F6F',
   placeholder: '#23211E',
   cardBackground: '#23211E',
+  disactiveTab: '#B7B7B7',
+  black: '#000000',
 };

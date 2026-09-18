@@ -7,11 +7,12 @@ import { Fonts } from '../../constants/fonts';
 
 type Props = {
     title: string;
+    style?: object;
 };
 
-export default function Title({ title }: Props) {
+export default function Title({ title, style }: Props) {
   return (
-    <Text style={styles.text}>
+    <Text style={[styles.text, style]}>
       {title}
     </Text>
   );
@@ -22,7 +23,7 @@ const styles = StyleSheet.create({
     color: Colors.text,
     fontFamily: Fonts.bold,
     fontSize: 28,
-    marginTop: 58,
+    marginTop: 60,
     textAlign: 'center',
   },
 });

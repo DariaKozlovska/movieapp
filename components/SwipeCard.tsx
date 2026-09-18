@@ -22,6 +22,8 @@ import { useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { getMovieTrailer } from '../api/tmdbApi';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Colors } from '@/constants/colors';
+import AppButton from './Button/AppButton';
 
 const { width, height } = Dimensions.get('window');
 
@@ -71,9 +73,9 @@ export default function SwipeCard({
 
     const color =
       translateX.value > 0
-        ? 'rgba(0,255,0,0.6)'
+        ? Colors.green
         : translateX.value < 0
-        ? 'rgba(255,0,0,0.6)'
+        ? Colors.red
         : 'transparent';
 
     return {
@@ -137,23 +139,17 @@ export default function SwipeCard({
             style={styles.image}
           />
 
+          <Animated.View style={swipeOverlayStyle} />
+
           <LinearGradient
             colors={['transparent', 'rgba(0,0,0,0.9)']}
             style={styles.gradientOverlay}
           />
 
-          <Animated.View style={swipeOverlayStyle} />
-
           <View style={styles.bottomBlock}>
             <Text style={styles.title}>{movie.title}</Text>
 
-            <TouchableOpacity
-              style={styles.trailerButton}
-              onPress={openTrailer}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.trailerText}> Obejrzyj zwiastun</Text>
-            </TouchableOpacity>
+            <AppButton title={'Obejrzyj zwiastun'} onPress={openTrailer} style={styles.trailerButton} />
           </View>
         </Pressable>
       </Animated.View>
@@ -168,7 +164,7 @@ const styles = StyleSheet.create({
     height: CARD_HEIGHT,
     borderRadius: 20,
     alignSelf: 'center',
-    backgroundColor: '#000',
+    backgroundColor: Colors.background,
     elevation: 8,
   },
   cardInner: {
@@ -196,27 +192,24 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: '100%',
     height: '18%',
-    backgroundColor: '#000',
+    backgroundColor: Colors.black,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 16,
   },
   title: {
-    color: '#fff',
+    color: Colors.text,
     fontSize: 24,
     fontWeight: '700',
     marginBottom: 6,
     textAlign: 'center',
   },
   trailerButton: {
-    backgroundColor: '#e50914',
-    paddingVertical: 10,
-    borderRadius: 10,
     width: '90%',
-    alignItems: 'center',
+    marginBottom: 14,
   },
   trailerText: {
-    color: '#fff',
+    color: Colors.text,
     fontSize: 15,
     fontWeight: '600',
   },
