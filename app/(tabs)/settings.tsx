@@ -5,6 +5,7 @@ import Title from '@/components/Text/title';
 import { Colors } from '@/constants/colors';
 import logoutViewModel from '@/viewModels/logoutViewModel';
 import { View, StyleSheet } from 'react-native';
+import SettingButton from '@/components/Button/SettingButton';
 
 export default function LoginScreen() {
 
@@ -18,8 +19,13 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <HelpButton />
-      <Title title="Ustawienia" />
-      <AppButton title={"Wyloguj się"} onPress={handleLogout} />
+      <Title title="Ustawienia" style={{ marginBottom: 30 }} />
+      <SettingButton title="Dane osobowe" onPress={() => {}} />
+      <SettingButton title="Polityka prywatności" onPress={() => {}} />
+      <SettingButton title="Powiadomienia i dźwięki" onPress={() => {}} />
+        <View style={{ position: 'absolute', bottom: 0, width: '100%', marginBottom: 60, alignItems: 'center' }}>
+          <AppButton title={"Wyloguj się"} onPress={handleLogout} />
+        </View>
     </View>
   );
 }
