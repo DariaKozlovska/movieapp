@@ -10,24 +10,24 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
 import { Fonts } from '../../constants/fonts';
 
-export interface SelectorOption {
-  id: number | null;
+export interface SelectorOption<T = number> {
+  id: T | null;
   name: string;
 }
 
-type Props = {
-  options: SelectorOption[];
-  selectedOption: number | string | null;
-  onSelectOption: (optionId: number | null) => void;
+type Props<T> = {
+  options: SelectorOption<T>[];
+  selectedOption: T | null;
+  onSelectOption: (optionId: T | null) => void;
   placeholder?: string;
 };
 
-export default function Selector({
+export default function Selector<T>({
   options,
   selectedOption,
   onSelectOption,
   placeholder = 'Wybierz kategorię',
-}: Props) {
+}: Props<T>) {
   const [opened, setOpened] = useState(false);
 
   const selected =
@@ -77,7 +77,7 @@ export default function Selector({
 
 const styles = StyleSheet.create({
   container: {
-    width: 150,
+    minWidth: 150,
     alignItems: 'center',
     position: 'relative',
     zIndex: 1000,
@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
   },
 
   selector: {
-    width: 150,
+    minWidth: 150,
     height: 40,
 
     borderRadius: 12,
@@ -100,6 +100,8 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
 
     gap: 8,
+
+    paddingHorizontal: 12,
   },
 
   selectorText: {
@@ -112,7 +114,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 48,
 
-    width: 150,
+    minWidth: 150,
+    paddingHorizontal: 12,
 
     backgroundColor: Colors.cardBackground,
 

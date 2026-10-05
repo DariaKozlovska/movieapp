@@ -7,6 +7,13 @@ import { Movie } from '../../models/Movie';
 import Toast from 'react-native-root-toast';
 import MovieCard from '../../components/MovieCard';
 import AddWatchedModal from '../../components/AddWatchedModal';
+import Title from '@/components/Text/title';
+import { Colors } from '@/constants/colors';
+import { SearchButton } from '@/components/Button/SearchButton';
+import HelpButton from '@/components/Button/HelpButton';
+import Selector from '@/components/Selectors/Selector';
+import { SortOption, useMovieSorting } from '@/hooks/useMovieSorting';
+import { SORT_OPTIONS } from '@/constants/sortOptions';
 
 const MAX_REVIEW_LENGTH = 100;
 
@@ -42,6 +49,12 @@ export default function LikedMoviesScreen() {
     });
   };
 
+  const {
+  sortOption,
+    setSortOption,
+    sortedMovies,
+  } = useMovieSorting(likedMovies);
+
   if (!likedMovies.length) {
     return (
       <View style={styles.empty}>
@@ -52,8 +65,25 @@ export default function LikedMoviesScreen() {
 
   return (
     <View style={styles.container}>
+      <HelpButton />
+      <SearchButton />
+      <Title title="Polubienia" />
+
+      <Selector<string>
+        options={SORT_OPTIONS}
+        selectedOption={sortOption}
+          onSelectOption={(optionId) => {
+            if (optionId !== null) {
+              setSortOption(optionId as SortOption);
+            }
+          }}
+        placeholder="Sortuj"
+      />
+
+      <View style={{ height: 16 }} />
+
       <FlatList
-        data={likedMovies}
+        data={sortedMovies}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
@@ -84,13 +114,13 @@ export default function LikedMoviesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#121212' }, 
-  list: { padding: 16, paddingBottom: 32 },
+  container: { flex: 1, backgroundColor: Colors.background },
+  list: { paddingHorizontal: 16, paddingBottom: 32 },
   empty: { 
     flex: 1, 
     justifyContent: 'center', 
     alignItems: 'center',
-    backgroundColor: '#121212' 
+    backgroundColor: Colors.background,
   },
-  emptyText: { color: '#fff', fontSize: 16 },
+  emptyText: { color: Colors.text, fontSize: 16 },
 });

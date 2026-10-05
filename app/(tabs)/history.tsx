@@ -6,6 +6,10 @@ import MovieCard from '../../components/MovieCard';
 import AddWatchedModal from '../../components/AddWatchedModal';
 import AddCustomMovieModal from '../../components/AddCustomMovieModal';
 import { Ionicons } from '@expo/vector-icons';
+import Title from '@/components/Text/title';
+import { SearchButton } from '@/components/Button/SearchButton';
+import HelpButton from '@/components/Button/HelpButton';
+import { Colors } from '@/constants/colors';
 
 type SortOption = 'rating' | 'date';
 
@@ -38,13 +42,12 @@ export default function WatchedScreen() {
 
   const cancelEdit = () => setEditingMovieId(null);
 
-  // 🔹 Sortowane dane
   const sortedMovies = useMemo(() => {
     const moviesCopy = [...watchedMovies];
     if (sortOption === 'rating') {
       return moviesCopy.sort((a, b) => (b.userRating ?? 0) - (a.userRating ?? 0));
     } else {
-      return moviesCopy.sort((a, b) => b.id - a.id); // najnowsze na górze
+      return moviesCopy.sort((a, b) => b.id - a.id);
     }
   }, [watchedMovies, sortOption]);
 
@@ -66,7 +69,12 @@ export default function WatchedScreen() {
     : null;
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#121212' }}>
+    <View style={{ flex: 1, backgroundColor: Colors.background }}>
+
+      <HelpButton />
+      <SearchButton />
+      <Title title="Historia seansów" />
+
       <View style={styles.topPanel}>
         <TouchableOpacity
           style={styles.addButton}

@@ -11,16 +11,17 @@ import AppInput from '@/components/Input/AppInput';
 
 import { Colors } from '@/constants/colors';
 import { Fonts } from '@/constants/fonts';
+import Title from '@/components/Text/title';
 
 export default function SearchScreen() {
   const [query, setQuery] = useState('');
 
   return (
-    <ScreenContainer>
+    // <ScreenContainer>
+
+
       <View style={styles.container}>
-        <Text style={styles.title}>
-          Wyszukiwarka filmów
-        </Text>
+              <Title title="Wyszukiwarka" />
 
         <View style={{ height: 24 }} />
 
@@ -30,7 +31,7 @@ export default function SearchScreen() {
           onChangeText={setQuery}
         />
 
-        <View style={{ height: 32 }} />
+        {/* <View style={{ height: 32 }} /> */}
 
         {query.length === 0 ? (
           <View style={styles.emptyContainer}>
@@ -64,7 +65,7 @@ export default function SearchScreen() {
           />
         )}
       </View>
-    </ScreenContainer>
+    // </ScreenContainer>
   );
 }
 
@@ -72,18 +73,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 40,
-  },
-
-  title: {
-    color: Colors.text,
-    fontSize: 30,
-    fontFamily: Fonts.bold,
-    textAlign: 'center',
+    backgroundColor: Colors.background,
   },
 
   emptyContainer: {
-    marginTop: 80,
+    marginTop: 50,
     alignItems: 'center',
   },
 

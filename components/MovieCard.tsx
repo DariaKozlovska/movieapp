@@ -4,6 +4,9 @@ import { TMDB_IMAGE_URL } from '../constants/config';
 import { Movie } from '../models/Movie';
 import { WatchedMovie } from '../models/WatchedMovie';
 import StarRating from './StarRating';
+import { Colors } from '@/constants/colors';
+import { Color } from 'expo-router';
+import { Fonts } from '@/constants/fonts';
 
 interface Props {
   movie: Movie | WatchedMovie;
@@ -75,43 +78,45 @@ export default function MovieCard({
             {isWatched ? (
               <StarRating rating={userRating ?? 0} onChange={() => {}} />
             ) : (
-              <Text style={styles.apiRating}>
-                Rating: {userRating?.toFixed(1)}
-              </Text>
+              <View style={{ marginBottom: 12, flexDirection: 'row', alignItems: 'flex-end'}}>
+                <Text style={{ fontSize: 16, color: Colors.text, marginRight: 2, fontFamily: Fonts.bold }}>
+                  {userRating?.toFixed(1)}
+                </Text>
+                <Image source={require('@/assets/images/Star.png')} style={{ width: 20, height: 20 }} />
+              </View>
             )}
           </View>
           <View style={styles.rightBlock}>
             <TouchableOpacity
               onPress={confirmRemove}
-              style={styles.removeButton}
             >
             <View
               style={{
-                width: 28,
-                height: 28,
-                borderRadius: 14,
-                backgroundColor: '#e50914',
+                width: 32,
+                height: 32,
+                borderRadius: 18,
+                backgroundColor: Colors.red,
                 justifyContent: 'center',
                 alignItems: 'center',
               }}
             >
-              <Ionicons name="close" size={18} color="#fff" />
+              <Ionicons name="close" size={24} color={Colors.text} />
             </View>
             </TouchableOpacity>
 
             {isWatched && onEdit && (
-              <TouchableOpacity onPress={onEdit} style={styles.removeButton}>
+              <TouchableOpacity onPress={onEdit} style={{ marginTop: 8 }}>
                 <View 
                   style={{
                     width: 28,
                     height: 28,
                     borderRadius: 14,
-                    backgroundColor: 'rgba(0,255,0,0.6)',
+                    backgroundColor: Colors.green,
                     justifyContent: 'center',
                     alignItems: 'center',
                   }}
                 >
-                  <Ionicons name="pencil" size={18} color="#fff" />
+                  <Ionicons name="pencil" size={18} color={Colors.text} />
                 </View>
               </TouchableOpacity>
             )}
@@ -124,13 +129,6 @@ export default function MovieCard({
             <Text style={styles.review} numberOfLines={3}>
               {'"'}{userReview}{'"'}
             </Text>
-{/* 
-            {onEdit && (
-              <TouchableOpacity style={styles.editButton} onPress={onEdit}>
-                <Ionicons name="pencil" size={14} color="#00b894" />
-                <Text style={styles.editText}>Edytuj</Text>
-              </TouchableOpacity>
-            )} */}
           </View>
           ) : null
         ) : (
@@ -148,23 +146,22 @@ export default function MovieCard({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#121212' },
+  container: { flex: 1, backgroundColor: Colors.background },
   listContent: { padding: 16, paddingBottom: 32, flexGrow: 1 },
 
-  empty: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#121212' },
-  emptyText: { color: '#aaa', fontSize: 18 },
+  empty: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.background },
+  emptyText: { color: Colors.text, fontSize: 18 },
 
   card: {
     flexDirection: 'row',
-    backgroundColor: '#1A1A1A',
+    backgroundColor: Colors.cardBackground,
     borderRadius: 20,
     marginBottom: 16,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOpacity: 0.25,
-    shadowOffset: { width: 0, height: 6 },
-    shadowRadius: 10,
     elevation: 6,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    
   },
 
   noImage: {
@@ -193,20 +190,19 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#e50914',
+    backgroundColor: Colors.red,
     justifyContent: 'center',
     alignItems: 'center',
   },
 
-  image: { width: 100, minHeight: 150, alignSelf: 'stretch', resizeMode: 'cover' },
+  image: { width: 110, minHeight: 150, alignSelf: 'stretch', resizeMode: 'cover' },
   infoBlock: { flex: 1, padding: 12, justifyContent: 'space-between' },
   textBlock: { flex: 1, paddingRight: 26, justifyContent: 'flex-start' },
   topBlock: { flex: 1, flexDirection: 'row', justifyContent: 'space-between'},
-  title: { color: '#fff', fontSize: 24, fontWeight: '700' },
-  rating: { marginTop: 6, color: '#aaa', fontSize: 14 },
+  title: { color: Colors.text, fontSize: 24, fontFamily: Fonts.bold },
+  rating: { marginTop: 6, color: Colors.text, fontSize: 14 },
   rightBlock: { alignItems: 'flex-end' },
-  removeButton: { padding: 4 },
-  removeText: { color: '#e50914', fontSize: 20, fontWeight: '700' },
-  watchedButton: { backgroundColor: 'rgba(0,255,0,0.6)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10 },
-  watchedText: { color: '#fff', fontSize: 16, fontWeight: '600', textAlign: 'center' },
+  removeText: { color: Colors.red, fontSize: 20, fontWeight: '700' },
+  watchedButton: { backgroundColor: Colors.green, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 },
+  watchedText: { color: Colors.text, fontSize: 18, fontFamily: Fonts.bold, textAlign: 'center', paddingVertical: 8 },
 });
