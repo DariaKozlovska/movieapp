@@ -1,32 +1,48 @@
-import React, { useState, useMemo } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+
 import { useWatchedMovies } from '../../contexts/WatchedMoviesContext';
 import MovieCard from '../../components/MovieCard';
 import AddWatchedModal from '../../components/AddWatchedModal';
-import AddCustomMovieModal from '../../components/AddCustomMovieModal';
-import { Ionicons } from '@expo/vector-icons';
+
 import Title from '@/components/Text/title';
 import { SearchButton } from '@/components/Button/SearchButton';
 import HelpButton from '@/components/Button/HelpButton';
-import { Colors } from '@/constants/colors';
+import Selector from '@/components/Selectors/Selector';
 
-type SortOption = 'rating' | 'date';
+import { Colors } from '@/constants/colors';
+import { SORT_OPTIONS } from '@/constants/sortOptions';
+import { SortOption, useMovieSorting } from '@/hooks/useMovieSorting';
+
+import { WatchedMovie } from '@/models/WatchedMovie';
 
 export default function WatchedScreen() {
   const router = useRouter();
-  const { watchedMovies, removeWatchedMovie, updateWatchedMovie } = useWatchedMovies();
+
+  const {
+    watchedMovies,
+    removeWatchedMovie,
+    updateWatchedMovie,
+  } = useWatchedMovies();
 
   const [editingMovieId, setEditingMovieId] = useState<number | null>(null);
   const [rating, setRating] = useState(3);
   const [review, setReview] = useState('');
-  const [customModalVisible, setCustomModalVisible] = useState(false);
-  const [sortOption, setSortOption] = useState<SortOption>('date');
 
-  const handleRemove = (id: number) => removeWatchedMovie(id);
+  const {
+    sortOption,
+    setSortOption,
+    sortedMovies,
+  } = useMovieSorting(watchedMovies);
+
+  const handleRemove = (id: number) => {
+    removeWatchedMovie(id);
+  };
 
   const handleEdit = (movieId: number) => {
     const movie = watchedMovies.find((m) => m.id === movieId);
+
     if (!movie) return;
 
     setRating(movie.userRating ?? 3);
@@ -36,24 +52,28 @@ export default function WatchedScreen() {
 
   const saveChanges = () => {
     if (editingMovieId === null) return;
-    updateWatchedMovie(editingMovieId, rating, review);
+
+    updateWatchedMovie(
+      editingMovieId,
+      rating,
+      review,
+    );
+
     setEditingMovieId(null);
   };
 
-  const cancelEdit = () => setEditingMovieId(null);
+  const cancelEdit = () => {
+    setEditingMovieId(null);
+  };
 
-  const sortedMovies = useMemo(() => {
-    const moviesCopy = [...watchedMovies];
-    if (sortOption === 'rating') {
-      return moviesCopy.sort((a, b) => (b.userRating ?? 0) - (a.userRating ?? 0));
-    } else {
-      return moviesCopy.sort((a, b) => b.id - a.id);
-    }
-  }, [watchedMovies, sortOption]);
-
-  const renderItem = ({ item, index }: { item: any; index: number }) => (
+  const renderItem = ({
+    item,
+    index,
+  }: {
+    item: WatchedMovie;
+    index: number;
+  }) => (
     <MovieCard
-      key={`${item.id}-${index}`}
       movie={item}
       userRating={item.userRating}
       userReview={item.review}
@@ -64,50 +84,42 @@ export default function WatchedScreen() {
     />
   );
 
-  const editingMovie = editingMovieId !== null
-    ? watchedMovies.find((m) => m.id === editingMovieId)
-    : null;
+  const editingMovie =
+    editingMovieId !== null
+      ? watchedMovies.find((m) => m.id === editingMovieId)
+      : null;
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.background }}>
-
+    <View style={styles.container}>
       <HelpButton />
       <SearchButton />
+
       <Title title="Historia seansów" />
 
-      <View style={styles.topPanel}>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => setCustomModalVisible(true)}
-        >
-          <Ionicons name="add" size={28} color="#fff" />
-        </TouchableOpacity>
+      <Selector<SortOption>
+        options={SORT_OPTIONS}
+        selectedOption={sortOption}
+        onSelectOption={(optionId) => {
+          if (optionId !== null) {
+            setSortOption(optionId);
+          }
+        }}
+        placeholder="Sortuj"
+      />
 
-        <View style={styles.sortButtons}>
-          <TouchableOpacity
-            style={[styles.sortButton, sortOption === 'rating' && styles.sortButtonActive]}
-            onPress={() => setSortOption('rating')}
-          >
-            <Text style={styles.sortText}>Ocena</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.sortButton, sortOption === 'date' && styles.sortButtonActive]}
-            onPress={() => setSortOption('date')}
-          >
-            <Text style={styles.sortText}>Data dodania</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      <View style={{ height: 16 }} />
 
       {watchedMovies.length === 0 ? (
         <View style={styles.center}>
-          <Text style={styles.emptyText}>Nie masz jeszcze żadnych obejrzanych filmów.</Text>
+          <Text style={styles.emptyText}>
+            Nie masz jeszcze żadnych obejrzanych filmów.
+          </Text>
         </View>
       ) : (
         <FlatList
           data={sortedMovies}
           renderItem={renderItem}
-          keyExtractor={(item, index) => `${item.id}-${index}`}
+          keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.list}
         />
       )}
@@ -124,43 +136,29 @@ export default function WatchedScreen() {
           onSave={saveChanges}
         />
       )}
-
-      <AddCustomMovieModal
-        visible={customModalVisible}
-        onClose={() => setCustomModalVisible(false)}
-      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  topPanel: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    justifyContent: 'space-between',
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
   },
-  addButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(0,255,0,0.6)',
+
+  list: {
+    paddingHorizontal: 16,
+    paddingBottom: 32,
+  },
+
+  center: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  sortButtons: { flexDirection: 'row' },
-  sortButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    backgroundColor: '#333',
-    marginLeft: 8,
+
+  emptyText: {
+    color: Colors.text,
+    fontSize: 16,
   },
-  sortButtonActive: {
-    backgroundColor: 'rgba(0,255,0,0.6)',
-  },
-  sortText: { color: '#fff', fontWeight: '700' },
-  list: { paddingHorizontal: 16, paddingBottom: 32 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  emptyText: { color: '#fff', fontSize: 16 },
 });

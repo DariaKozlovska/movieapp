@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { Movie } from '@/models/Movie';
 
 export type SortOption =
   | 'newest'
@@ -9,8 +8,18 @@ export type SortOption =
   | 'ratingDesc'
   | 'ratingAsc';
 
-export const useMovieSorting = (movies: Movie[]) => {
-  const [sortOption, setSortOption] = useState<SortOption>('newest');
+type SortableMovie = {
+  title: string;
+  vote_average?: number;
+  userRating?: number;
+  watchedAt?: string;
+};
+
+export const useMovieSorting = <T extends SortableMovie>(
+  movies: T[],
+) => {
+  const [sortOption, setSortOption] =
+    useState<SortOption>('newest');
 
   const sortedMovies = useMemo(() => {
     const moviesToSort = [...movies];
@@ -28,18 +37,42 @@ export const useMovieSorting = (movies: Movie[]) => {
 
       case 'ratingDesc':
         return moviesToSort.sort(
-          (a, b) => b.vote_average - a.vote_average,
+          (a, b) =>
+            (b.userRating ?? b.vote_average ?? 0) -
+            (a.userRating ?? a.vote_average ?? 0),
         );
 
       case 'ratingAsc':
         return moviesToSort.sort(
-          (a, b) => a.vote_average - b.vote_average,
+          (a, b) =>
+            (a.userRating ?? a.vote_average ?? 0) -
+            (b.userRating ?? b.vote_average ?? 0),
         );
 
       case 'newest':
-        return moviesToSort.reverse();
+        return moviesToSort.sort((a, b) => {
+          if (a.watchedAt && b.watchedAt) {
+            return (
+              new Date(b.watchedAt).getTime() -
+              new Date(a.watchedAt).getTime()
+            );
+          }
+
+          return 0;
+        });
 
       case 'oldest':
+        return moviesToSort.sort((a, b) => {
+          if (a.watchedAt && b.watchedAt) {
+            return (
+              new Date(a.watchedAt).getTime() -
+              new Date(b.watchedAt).getTime()
+            );
+          }
+
+          return 0;
+        });
+
       default:
         return moviesToSort;
     }
