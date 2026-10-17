@@ -25,7 +25,7 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="search"
+        name="room"
         options={{
           tabBarIcon: ({ focused }) => (
             <Image

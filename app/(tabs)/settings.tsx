@@ -7,30 +7,44 @@ import logoutViewModel from '@/viewModels/logoutViewModel';
 import { View, StyleSheet } from 'react-native';
 import SettingButton from '@/components/Button/SettingButton';
 
-export default function LoginScreen() {
-
+export default function SettingsScreen() {
   const handleLogout = async () => {
-      const result = await logoutViewModel.logout();
-  if (result.success) {
-    router.replace('/login');
-  }
-    
+    const result = await logoutViewModel.logout();
+    if (result.success) {
+      router.replace('/login');
+    }
   };
+
   return (
     <View style={styles.container}>
       <HelpButton />
       <Title title="Ustawienia" style={{ marginBottom: 30 }} />
-      <SettingButton title="Dane osobowe" onPress={() => {}} />
-      <SettingButton title="Polityka prywatności" onPress={() => {}} />
-      <SettingButton title="Powiadomienia i dźwięki" onPress={() => {}} />
-        <View style={{ position: 'absolute', bottom: 0, marginBottom: 60, alignItems: 'center', left: 0, right: 0, marginHorizontal: 24 }}>
-          <AppButton title={"Wyloguj się"} onPress={handleLogout} />
-        </View>
+
+      <View style={styles.content}>
+        <SettingButton title="Dane osobowe" onPress={() => {}} />
+        <SettingButton title="Polityka prywatności" onPress={() => {}} />
+        <SettingButton title="Powiadomienia i dźwięki" onPress={() => {}} />
+      </View>
+
+      <View style={styles.footer}>
+        <AppButton title="Wyloguj się" onPress={handleLogout} />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background, paddingHorizontal: 24 },
-  text: { color: Colors.text, fontSize: 16 },
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+    paddingHorizontal: 16,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  footer: {
+    paddingHorizontal: 16,
+    paddingBottom: 60,
+  },
 });

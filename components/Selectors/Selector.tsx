@@ -4,6 +4,8 @@ import {
   TouchableOpacity,
   Text,
   StyleSheet,
+  ViewStyle,
+  TextStyle,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -20,6 +22,16 @@ type Props<T> = {
   selectedOption: T | null;
   onSelectOption: (optionId: T | null) => void;
   placeholder?: string;
+
+  // Style całego komponentu
+  style?: ViewStyle;
+
+  // Style poszczególnych elementów
+  selectorStyle?: ViewStyle;
+  selectorTextStyle?: TextStyle;
+  dropdownStyle?: ViewStyle;
+  optionStyle?: ViewStyle;
+  optionTextStyle?: TextStyle;
 };
 
 export default function Selector<T>({
@@ -27,6 +39,12 @@ export default function Selector<T>({
   selectedOption,
   onSelectOption,
   placeholder = 'Wybierz kategorię',
+  style,
+  selectorStyle,
+  selectorTextStyle,
+  dropdownStyle,
+  optionStyle,
+  optionTextStyle,
 }: Props<T>) {
   const [opened, setOpened] = useState(false);
 
@@ -35,13 +53,13 @@ export default function Selector<T>({
     placeholder;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, style]}>
       <TouchableOpacity
-        style={styles.selector}
+        style={[styles.selector, selectorStyle]}
         activeOpacity={1}
         onPress={() => setOpened((prev) => !prev)}
       >
-        <Text style={styles.selectorText}>
+        <Text style={[styles.selectorText, selectorTextStyle]}>
           {selected}
         </Text>
 
@@ -53,18 +71,18 @@ export default function Selector<T>({
       </TouchableOpacity>
 
       {opened && (
-        <View style={styles.dropdown}>
+        <View style={[styles.dropdown, dropdownStyle]}>
           {options.map((option) => (
             <TouchableOpacity
               key={String(option.id)}
-              style={styles.option}
+              style={[styles.option, optionStyle]}
               activeOpacity={1}
               onPress={() => {
                 onSelectOption(option.id);
                 setOpened(false);
               }}
             >
-              <Text style={styles.optionText}>
+              <Text style={[styles.optionText, optionTextStyle]}>
                 {option.name}
               </Text>
             </TouchableOpacity>
@@ -87,20 +105,14 @@ const styles = StyleSheet.create({
   selector: {
     minWidth: 150,
     height: 40,
-
     borderRadius: 12,
-
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-
     backgroundColor: Colors.cardBackground,
-
     borderWidth: 1,
     borderColor: Colors.border,
-
     gap: 8,
-
     paddingHorizontal: 12,
   },
 
@@ -113,19 +125,13 @@ const styles = StyleSheet.create({
   dropdown: {
     position: 'absolute',
     top: 48,
-
     minWidth: 150,
     paddingHorizontal: 12,
-
     backgroundColor: Colors.cardBackground,
-
     borderRadius: 14,
-
     borderWidth: 1,
     borderColor: Colors.border,
-
     overflow: 'hidden',
-
     zIndex: 9999,
   },
 
