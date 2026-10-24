@@ -43,7 +43,11 @@
       "expo-image",
       "expo-status-bar",
       "expo-web-browser",
-      "expo-asset"
+      "expo-asset",
+      ["expo-camera", 
+        { "cameraPermission": "Aplikacja używa aparatu do skanowania kodu QR pokoju." 
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

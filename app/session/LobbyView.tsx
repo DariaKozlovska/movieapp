@@ -8,6 +8,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import QRCode from 'react-native-qrcode-svg';
 
 import AppButton from '@/components/Button/AppButton';
 
@@ -76,6 +77,18 @@ export default function LobbyView({ sessionId, onLeave, onExpired }: Props) {
         </TouchableOpacity>
 
         <View style={[styles.card, styles.codeCard]}>
+          {/* Dark modules on a white background: scans much more reliably
+              than white-on-dark. The QR contains just the room code. */}
+          <View style={styles.qrBox}>
+            <QRCode
+              value={session.code}
+              size={180}
+              color="#000000"
+              backgroundColor="#FFFFFF"
+              quietZone={4}
+            />
+          </View>
+
           <Text style={styles.code}>{session.code}</Text>
 
           <View style={styles.track}>
@@ -163,12 +176,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
+  qrBox: {
+    padding: 12,
+    marginBottom: 20,
+    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+  },
+
   code: {
     color: Colors.text,
     fontFamily: Fonts.bold,
-    fontSize: 40,
+    fontSize: 36,
     letterSpacing: 6,
-    marginBottom: 24,
+    marginBottom: 20,
   },
 
   track: {

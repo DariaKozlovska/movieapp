@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
+import { CameraView, type BarcodeScanningResult } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 
 import AppButton from '@/components/Button/AppButton';
@@ -22,11 +23,18 @@ type Props = {
 };
 
 export default function JoinSessionView({ onJoined }: Props) {
-  const { accessCode, setAccessCode, joinSession, scanQr } =
-    useJoinSessionViewModel();
+  const {
+    accessCode,
+    setAccessCode,
+    joinSession,
+    isScanning,
+    startScan,
+    stopScan,
+    handleScanned,
+  } = useJoinSessionViewModel();
 
-  const handleJoinSession = async () => {
-    const result = await joinSession();
+  const submit = async (code?: string) => {
+    const result = await joinSession(code);
 
     if (!result.success) {
       if (result.message) Alert.alert('Nie udało się dołączyć', result.message);
@@ -34,6 +42,11 @@ export default function JoinSessionView({ onJoined }: Props) {
     }
 
     onJoined(result.data.sessionId);
+  };
+
+  const handleBarcodeScanned = ({ data }: BarcodeScanningResult) => {
+    const code = handleScanned(data);
+    if (code) submit(code);
   };
 
   return (
@@ -46,20 +59,42 @@ export default function JoinSessionView({ onJoined }: Props) {
       >
         <Text style={styles.sectionTitle}>Zeskanuj QR</Text>
 
-        <TouchableOpacity
-          style={styles.scanBox}
-          activeOpacity={0.8}
-          onPress={scanQr}
-          accessibilityRole="button"
-          accessibilityLabel="Zeskanuj kod QR"
-        >
-          <Ionicons
-            name="camera"
-            size={44}
-            color={Colors.text}
-            style={styles.cameraIcon}
-          />
-        </TouchableOpacity>
+        <View style={styles.scanBox}>
+          {isScanning ? (
+            <>
+              <CameraView
+                style={StyleSheet.absoluteFill}
+                facing="back"
+                barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+                onBarcodeScanned={handleBarcodeScanned}
+              />
+
+              <TouchableOpacity
+                style={styles.closeScan}
+                onPress={stopScan}
+                accessibilityRole="button"
+                accessibilityLabel="Zamknij aparat"
+              >
+                <Ionicons name="close" size={22} color="#FFFFFF" />
+              </TouchableOpacity>
+            </>
+          ) : (
+            <TouchableOpacity
+              style={styles.scanPlaceholder}
+              activeOpacity={0.8}
+              onPress={startScan}
+              accessibilityRole="button"
+              accessibilityLabel="Zeskanuj kod QR"
+            >
+              <Ionicons
+                name="camera"
+                size={44}
+                color={Colors.text}
+                style={styles.cameraIcon}
+              />
+            </TouchableOpacity>
+          )}
+        </View>
 
         <Text style={[styles.sectionTitle, styles.codeTitle]}>
           Albo wpisz hasło dostępu
@@ -69,13 +104,13 @@ export default function JoinSessionView({ onJoined }: Props) {
           style={styles.codeInput}
           value={accessCode}
           onChangeText={setAccessCode}
-          placeholder="np. K3U7hh6"
+          placeholder="np. K3U7H6"
           placeholderTextColor={Colors.border}
           autoCapitalize="characters"
           maxLength={6}
           autoCorrect={false}
           returnKeyType="done"
-          onSubmitEditing={handleJoinSession}
+          onSubmitEditing={() => submit()}
           accessibilityLabel="Hasło dostępu"
         />
       </ScrollView>
@@ -83,7 +118,7 @@ export default function JoinSessionView({ onJoined }: Props) {
       <View style={styles.footer}>
         <AppButton
           title="Dołącz do pokoju"
-          onPress={handleJoinSession}
+          onPress={() => submit()}
           variant="success"
         />
       </View>
@@ -118,8 +153,24 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
     backgroundColor: Colors.cardBackground,
+    overflow: 'hidden',
+  },
+
+  scanPlaceholder: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+
+  closeScan: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
   },
 
   cameraIcon: {

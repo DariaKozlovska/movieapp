@@ -24,6 +24,7 @@ a dalej naley umieścić kluch do pliku .env w głównym folderze projektu. EXPO
    npx expo install react-native-safe-area-context
    npx expo install @react-native-async-storage/async-storage
    npx pod-install
+   npx expo install expo-camera react-native-svg react-native-qrcode-svg
 
    dla firebase 
    npm install firebase
