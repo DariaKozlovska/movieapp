@@ -29,6 +29,7 @@ import LikeButton from '@/components/Button/LikeButton';
 import { Movie } from '@/models/Movie';
 import { WatchedMovie } from '@/models/WatchedMovie';
 import { BackButton } from '@/components/Button/BackButton';
+import { getRoomMovie } from '@/services/roomMovieCache';
 
 const { height } = Dimensions.get('window');
 
@@ -60,8 +61,12 @@ export default function MovieDetailsScreen() {
   const watchedMovie = watchedMovies.find((m) => m.id.toString() === id);
   const likedMovie = likedMovies.find((m) => m.id.toString() === id);
   const apiMovie = movies.find((m) => m.id.toString() === id);
+  // movies from the room deck (opened from the room swipe screen)
+  const roomMovie = getRoomMovie(Number(id));
 
-  const movie = watchedMovie || likedMovie || apiMovie;
+  const movie = watchedMovie || likedMovie || apiMovie || roomMovie;
+
+
 
   if (!movie) {
     return (

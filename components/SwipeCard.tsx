@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   },
   trailerButton: {
     width: '90%',
-    marginBottom: 14,
+    marginBottom: 28,
   },
   trailerText: {
     color: Colors.text,

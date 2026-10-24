@@ -21,6 +21,8 @@ export type Session = {
   /** The shared deck: everybody swipes the same movies in the same order. */
   movies: Movie[];
   matchedMovieId: number | null;
+  /** Movies that were already matched (never offered as a match twice). */
+  matchedMovieIds: number[];
 };
 
 export type Participant = {

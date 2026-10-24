@@ -8,6 +8,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
+import AppButton from '@/components/Button/AppButton';
+
 import { Colors } from '@/constants/colors';
 import { Fonts } from '@/constants/fonts';
 
@@ -19,55 +21,93 @@ type Props = {
   onExpired: () => void;
 };
 
-/** What a GUEST sees after joining: a modal over the join screen. */
+/**
+ * What a GUEST sees after joining:
+ *  - while the room waits: a modal with a timer over the join screen
+ *  - while the game is on and the guest is back on this screen: a card
+ *    with a way back to the swiping
+ */
 export default function WaitingRoomModal({
   sessionId,
   onLeave,
   onExpired,
 }: Props) {
-  const { isWaiting, timeLabel, progress, handleLeave } = useLobbyViewModel(
-    sessionId,
-    { onLeave, onExpired },
-  );
+  const {
+    isWaiting,
+    isActive,
+    timeLabel,
+    progress,
+    handleLeave,
+    handleReturnToSwipe,
+  } = useLobbyViewModel(sessionId, { onLeave, onExpired });
 
   return (
-    <Modal
-      transparent
-      animationType="fade"
-      visible={isWaiting}
-      onRequestClose={handleLeave}
-      statusBarTranslucent
-    >
-      <View style={styles.backdrop}>
-        <View style={styles.card}>
-          <Text style={styles.title}>Czekamy na wszystkich</Text>
+    <>
+      <Modal
+        transparent
+        animationType="fade"
+        visible={isWaiting}
+        onRequestClose={handleLeave}
+        statusBarTranslucent
+      >
+        <View style={styles.backdrop}>
+          <View style={styles.card}>
+            <Text style={styles.title}>Czekamy na wszystkich</Text>
 
-          <View style={styles.iconCircle}>
-            {/* Put your clapperboard image here instead of the icon:
-                <Image source={require('@/assets/images/clapperboard.png')} /> */}
-            <Ionicons name="film" size={56} color={Colors.text} />
+            <View style={styles.iconCircle}>
+              {/* Put your clapperboard image here instead of the icon:
+                  <Image source={require('@/assets/images/clapperboard.png')} /> */}
+              <Ionicons name="film" size={56} color={Colors.text} />
+            </View>
+
+            <Text style={styles.text}>
+              Gdy wszyscy uczestnicy dołączą do pokoju zostaniesz
+              automatycznie przekierowany do okna wspólnego wyboru filmu
+            </Text>
+
+            <View style={styles.track}>
+              <View
+                style={[styles.trackFill, { width: `${progress * 100}%` }]}
+              />
+            </View>
+            <Text style={styles.time}>{timeLabel}</Text>
+
+            <TouchableOpacity
+              onPress={handleLeave}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+            >
+              <Text style={styles.leave}>Wyjdź</Text>
+            </TouchableOpacity>
           </View>
-
-          <Text style={styles.text}>
-            Gdy wszyscy uczestnicy dołączą do pokoju zostaniesz automatycznie
-            przekierowany do okna wspólnego wyboru filmu
-          </Text>
-
-          <View style={styles.track}>
-            <View style={[styles.trackFill, { width: `${progress * 100}%` }]} />
-          </View>
-          <Text style={styles.time}>{timeLabel}</Text>
-
-          <TouchableOpacity
-            onPress={handleLeave}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-          >
-            <Text style={styles.leave}>Wyjdź</Text>
-          </TouchableOpacity>
         </View>
-      </View>
-    </Modal>
+      </Modal>
+
+      {isActive && (
+        <View style={styles.activeOverlay}>
+          <View style={styles.card}>
+            <Text style={styles.title}>Sesja trwa</Text>
+            <Text style={[styles.text, styles.activeText]}>
+              Wspólny wybór filmu już się rozpoczął.
+            </Text>
+
+            <AppButton
+              title="Wróć do wyboru filmu"
+              onPress={handleReturnToSwipe}
+              variant="success"
+            />
+
+            <TouchableOpacity
+              onPress={handleLeave}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+            >
+              <Text style={styles.leave}>Wyjdź</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+    </>
   );
 }
 
@@ -77,6 +117,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 32,
     backgroundColor: 'rgba(0, 0, 0, 0.75)',
+  },
+
+  activeOverlay: {
+    // ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+    backgroundColor: Colors.background,
   },
 
   card: {
@@ -112,6 +159,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 20,
     textAlign: 'center',
+  },
+
+  activeText: {
+    marginTop: 12,
+    marginBottom: 24,
   },
 
   track: {

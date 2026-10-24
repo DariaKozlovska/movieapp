@@ -1,12 +1,24 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Alert,
+  StyleSheet,
+} from 'react-native';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 import SwipeCard from '@/components/SwipeCard';
 import Title from '@/components/Text/title';
+import HelpButton from '@/components/Button/HelpButton';
 import AppButton from '@/components/Button/AppButton';
+import { BackButton } from '@/components/Button/BackButton';
+
+import MatchModal from '@/app/session/matchedModal';
 
 import { Colors } from '@/constants/colors';
+import { Fonts } from '@/constants/fonts';
 
 import useRoomSwipeViewModel from '@/models/Swipe';
 
@@ -15,73 +27,90 @@ type Props = {
 };
 
 export default function SwipeView({ sessionId }: Props) {
-  const { loading, movies, matchedMovie, swipeLeft, swipeRight } =
-    useRoomSwipeViewModel(sessionId);
-
-  if (loading) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.text}>Ładowanie filmów...</Text>
-      </View>
-    );
-  }
-
-  // Everybody liked the same movie
-  if (matchedMovie) {
-    return (
-      <View style={styles.container}>
-        <Title title="Mamy film!" />
-
-        <View style={styles.cardsContainer}>
-          <SwipeCard movie={matchedMovie} disabled />
-        </View>
-
-        <View style={styles.footer}>
-          <AppButton
-            title="Wróć"
-            onPress={() => router.back()}
-            variant="success"
-          />
-        </View>
-      </View>
-    );
-  }
+  const {
+    loading,
+    code,
+    isAdmin,
+    movies,
+    matchedMovie,
+    swipeLeft,
+    swipeRight,
+    continueSwiping,
+    finishNow,
+    confirmFinish,
+  } = useRoomSwipeViewModel(sessionId);
 
   const currentMovie = movies[0];
   const nextMovie = movies[1];
 
-  // You swiped the whole deck, but there is no common movie (yet)
-  if (!currentMovie) {
-    return (
-      <View style={styles.container}>
-        <Title title="Koniec talii" />
-
-        <View style={styles.centered}>
-          <Text style={styles.text}>
-            Nie ma jeszcze wspólnego filmu. Poczekaj na pozostałych albo wróć.
-          </Text>
-        </View>
-
-        <View style={styles.footer}>
-          <AppButton title="Wróć" onPress={() => router.back()} />
-        </View>
-      </View>
+  const showCodeInfo = () => {
+    Alert.alert(
+      'Kod pokoju',
+      `Twój pokój ma kod ${code}. Wspólny wybór już trwa, więc nowe osoby nie mogą dołączyć.`,
     );
-  }
+  };
 
   return (
     <View style={styles.container}>
-      <Title title="Wybierz film" />
+      <BackButton />
+      <HelpButton />
+      <Title title="Filmy" />
+
+      {code && (
+        <View style={styles.codeRow}>
+          <Text style={styles.code}>{code}</Text>
+          <TouchableOpacity
+            onPress={showCodeInfo}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            accessibilityRole="button"
+            accessibilityLabel="Informacja o kodzie pokoju"
+          >
+            <Ionicons
+              name="information-circle"
+              size={24}
+              color={Colors.text}
+            />
+          </TouchableOpacity>
+        </View>
+      )}
 
       <View style={styles.cardsContainer}>
-        {nextMovie && <SwipeCard movie={nextMovie} disabled isNextCard />}
+        {loading ? (
+          <Text style={styles.text}>Ładowanie filmów...</Text>
+        ) : currentMovie ? (
+          <>
+            {nextMovie && <SwipeCard movie={nextMovie} disabled isNextCard />}
 
-        <SwipeCard
-          movie={currentMovie}
-          onSwipeLeft={swipeLeft}
-          onSwipeRight={swipeRight}
-        />
+            <SwipeCard
+              movie={currentMovie}
+              onSwipeLeft={swipeLeft}
+              onSwipeRight={swipeRight}
+            />
+          </>
+        ) : (
+          <Text style={[styles.text, styles.centeredText]}>
+            To były wszystkie filmy. Nie ma jeszcze wspólnego wyboru.
+          </Text>
+        )}
       </View>
+
+      {isAdmin && (
+        <View style={styles.footer}>
+          <AppButton
+            title="Zakończ wybieranie"
+            onPress={confirmFinish}
+            variant="primary"
+          />
+        </View>
+      )}
+
+      <MatchModal
+        movie={matchedMovie}
+        isAdmin={isAdmin}
+        onContinue={continueSwiping}
+        onFinish={finishNow}
+        onLeave={() => router.back()}
+      />
     </View>
   );
 }
@@ -89,28 +118,40 @@ export default function SwipeView({ sessionId }: Props) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
 
+  codeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 4,
+  },
+
+  code: {
+    color: Colors.text,
+    fontFamily: Fonts.bold,
+    fontSize: 24,
+    letterSpacing: 2,
+  },
+
   cardsContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
 
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 32,
-    backgroundColor: Colors.background,
-  },
-
   text: {
     color: Colors.text,
     fontSize: 18,
+  },
+
+  centeredText: {
     textAlign: 'center',
+    paddingHorizontal: 32,
   },
 
   footer: {
     paddingHorizontal: 32,
-    paddingBottom: 60,
+    paddingBottom: 30,
+    paddingTop: 8,
   },
 });

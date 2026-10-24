@@ -91,6 +91,7 @@ export async function createSession(
           participantIds: [adminId],
           movies: [],
           matchedMovieId: null,
+          matchedMovieIds: [],
           createdAt: serverTimestamp(),
         });
 
@@ -299,8 +300,18 @@ export async function likeMovie(
         session.participantCount !== null &&
         likedBy.size >= session.participantCount;
 
-      if (everyoneLiked && session.matchedMovieId === null) {
-        tx.update(sessionRef, { matchedMovieId: movieId, status: 'finished' });
+      const alreadyMatched = session.matchedMovieIds ?? [];
+
+      // The session stays "active": the admin decides what happens next
+      if (
+        everyoneLiked &&
+        session.matchedMovieId === null &&
+        !alreadyMatched.includes(movieId)
+      ) {
+        tx.update(sessionRef, {
+          matchedMovieId: movieId,
+          matchedMovieIds: arrayUnion(movieId),
+        });
         return true;
       }
 
@@ -310,6 +321,36 @@ export async function likeMovie(
     return ok({ matched });
   } catch (error) {
     console.error('likeMovie failed', error);
+    return fail(GENERIC_ERROR);
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Admin decisions after a match                                               */
+/* -------------------------------------------------------------------------- */
+
+/** "Kontynuuj swipowanie": hides the match modal for everybody. */
+export async function resumeSwiping(
+  sessionId: string,
+): Promise<ServiceResult<null>> {
+  try {
+    await updateDoc(doc(db, 'sessions', sessionId), { matchedMovieId: null });
+    return ok(null);
+  } catch (error) {
+    console.error('resumeSwiping failed', error);
+    return fail(GENERIC_ERROR);
+  }
+}
+
+/** "Zakończ wybieranie": ends the session for everybody. */
+export async function finishSession(
+  sessionId: string,
+): Promise<ServiceResult<null>> {
+  try {
+    await updateDoc(doc(db, 'sessions', sessionId), { status: 'finished' });
+    return ok(null);
+  } catch (error) {
+    console.error('finishSession failed', error);
     return fail(GENERIC_ERROR);
   }
 }
