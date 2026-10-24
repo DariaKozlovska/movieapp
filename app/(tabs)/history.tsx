@@ -36,6 +36,8 @@ export default function WatchedScreen() {
     sortedMovies,
   } = useMovieSorting(watchedMovies);
 
+  const isEmpty = watchedMovies.length === 0;
+
   const handleRemove = (id: number) => {
     removeWatchedMovie(id);
   };
@@ -53,11 +55,7 @@ export default function WatchedScreen() {
   const saveChanges = () => {
     if (editingMovieId === null) return;
 
-    updateWatchedMovie(
-      editingMovieId,
-      rating,
-      review,
-    );
+    updateWatchedMovie(editingMovieId, rating, review);
 
     setEditingMovieId(null);
   };
@@ -66,13 +64,7 @@ export default function WatchedScreen() {
     setEditingMovieId(null);
   };
 
-  const renderItem = ({
-    item,
-    index,
-  }: {
-    item: WatchedMovie;
-    index: number;
-  }) => (
+  const renderItem = ({ item }: { item: WatchedMovie }) => (
     <MovieCard
       movie={item}
       userRating={item.userRating}
@@ -96,32 +88,34 @@ export default function WatchedScreen() {
 
       <Title title="Historia seansów" />
 
-      <Selector<SortOption>
-        options={SORT_OPTIONS}
-        selectedOption={sortOption}
-        onSelectOption={(optionId) => {
-          if (optionId !== null) {
-            setSortOption(optionId);
-          }
-        }}
-        placeholder="Sortuj"
-      />
-
-      <View style={{ height: 16 }} />
-
-      {watchedMovies.length === 0 ? (
+      {isEmpty ? (
         <View style={styles.center}>
           <Text style={styles.emptyText}>
             Nie masz jeszcze żadnych obejrzanych filmów.
           </Text>
         </View>
       ) : (
-        <FlatList
-          data={sortedMovies}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={styles.list}
-        />
+        <>
+          <Selector<SortOption>
+            options={SORT_OPTIONS}
+            selectedOption={sortOption}
+            onSelectOption={(optionId) => {
+              if (optionId !== null) {
+                setSortOption(optionId);
+              }
+            }}
+            placeholder="Sortuj"
+          />
+
+          <View style={{ height: 16 }} />
+
+          <FlatList
+            data={sortedMovies}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id.toString()}
+            contentContainerStyle={styles.list}
+          />
+        </>
       )}
 
       {editingMovie && (

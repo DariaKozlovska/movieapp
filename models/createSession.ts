@@ -1,5 +1,14 @@
 import { useState } from 'react';
 
+import { auth } from '@/config/firebase';
+import { createSession } from '@/services/sessionService';
+import type { ServiceResult } from '@/types/session';
+
+type GenerateSessionResult = ServiceResult<{
+  sessionId: string;
+  code: string;
+}>;
+
 export default function useCreateSessionViewModel() {
   const [participantCount, setParticipantCount] = useState(2);
 
@@ -27,39 +36,40 @@ export default function useCreateSessionViewModel() {
     );
   };
 
-  type GenerateSessionResult =
-  | {
-      success: false;
-      message: string;
-    }
-  | {
-      success: true;
-      message: string;
-      data: {
-        participantCount: number;
-        participantNames: string[];
-      };
-    };
-
-    const generateSession = (): GenerateSessionResult => {
+  const generateSession = async (
+    genre: number | null,
+  ): Promise<GenerateSessionResult> => {
     const creatorName = participantNames[0]?.trim();
 
     if (!creatorName) {
-        return {
+      return {
         success: false,
         message: 'Wpisz swoje imię, aby utworzyć sesję.',
-        };
+      };
     }
 
-    return {
-        success: true,
-        message: 'Dane sesji zostały przygotowane.',
-        data: {
-        participantCount,
-        participantNames: participantNames.map((name) => name.trim()),
-        },
-    };
-    };
+    const user = auth.currentUser;
+
+    if (!user) {
+      return {
+        success: false,
+        message: 'Musisz być zalogowany, aby utworzyć sesję.',
+      };
+    }
+
+    const invitedNames = participantNames
+      .slice(1, participantCount)
+      .map((name) => name.trim())
+      .filter(Boolean);
+
+    return createSession({
+      adminId: user.uid,
+      adminName: creatorName,
+      maxParticipants: participantCount,
+      genre,
+      invitedNames,
+    });
+  };
 
   return {
     participantCount,

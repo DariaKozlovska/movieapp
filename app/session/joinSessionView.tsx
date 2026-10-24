@@ -17,19 +17,23 @@ import { Fonts } from '@/constants/fonts';
 
 import useJoinSessionViewModel from '@/models/joinSession';
 
-export default function JoinSessionView() {
+type Props = {
+  onJoined: (sessionId: string) => void;
+};
+
+export default function JoinSessionView({ onJoined }: Props) {
   const { accessCode, setAccessCode, joinSession, scanQr } =
     useJoinSessionViewModel();
 
-  const handleJoinSession = () => {
-    const result = joinSession();
+  const handleJoinSession = async () => {
+    const result = await joinSession();
 
     if (!result.success) {
-      Alert.alert('Brak danych', result.message);
+      if (result.message) Alert.alert('Nie udało się dołączyć', result.message);
       return;
     }
 
-    Alert.alert('Sesja', `Dołączanie do pokoju: ${result.data.accessCode}`);
+    onJoined(result.data.sessionId);
   };
 
   return (
@@ -67,7 +71,8 @@ export default function JoinSessionView() {
           onChangeText={setAccessCode}
           placeholder="np. K3U7hh6"
           placeholderTextColor={Colors.border}
-          autoCapitalize="none"
+          autoCapitalize="characters"
+          maxLength={6}
           autoCorrect={false}
           returnKeyType="done"
           onSubmitEditing={handleJoinSession}

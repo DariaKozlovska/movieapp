@@ -1,24 +1,40 @@
 import { useState } from 'react';
 
-type JoinSessionResult =
-  | { success: true; data: { accessCode: string } }
-  | { success: false; message: string };
+import { auth } from '@/config/firebase';
+import { getAccountName } from '@/services/userService';
+import { CODE_LENGTH } from '@/utils/generateCode';
+import { joinSession as joinSessionService } from '@/services/sessionService';
+import type { ServiceResult } from '@/types/session';
 
 export default function useJoinSessionViewModel() {
   const [accessCode, setAccessCode] = useState('');
+  const [isJoining, setIsJoining] = useState(false);
 
-  // Mock: later this is where the real API call / QR result will go
-  const joinSession = (): JoinSessionResult => {
-    const code = accessCode.trim();
+  const joinSession = async (): Promise<
+    ServiceResult<{ sessionId: string }>
+  > => {
+    if (isJoining) return { success: false, message: '' };
 
-    if (!code) {
+    const code = accessCode.trim().toUpperCase();
+
+    if (code.length !== CODE_LENGTH) {
       return {
         success: false,
-        message: 'Wpisz hasło dostępu lub zeskanuj kod QR.',
+        message: `Kod ma ${CODE_LENGTH} znaków. Wpisz go lub zeskanuj kod QR.`,
       };
     }
 
-    return { success: true, data: { accessCode: code } };
+    const user = auth.currentUser;
+    if (!user) {
+      return { success: false, message: 'Musisz być zalogowany.' };
+    }
+
+    setIsJoining(true);
+    const name = await getAccountName(user);
+    const result = await joinSessionService(code, user.uid, name);
+    setIsJoining(false);
+
+    return result;
   };
 
   // Mock: later this will open the camera and fill accessCode from the QR

@@ -27,6 +27,11 @@ export default function LikedMoviesScreen() {
   const [rating, setRating] = useState(3);
   const [review, setReview] = useState('');
 
+  const { sortOption, setSortOption, sortedMovies } =
+    useMovieSorting(likedMovies);
+
+  const isEmpty = likedMovies.length === 0;
+
   const openModal = (movie: Movie) => {
     setSelectedMovie(movie);
     setRating(3);
@@ -49,54 +54,48 @@ export default function LikedMoviesScreen() {
     });
   };
 
-  const {
-  sortOption,
-    setSortOption,
-    sortedMovies,
-  } = useMovieSorting(likedMovies);
-
-  if (!likedMovies.length) {
-    return (
-      <View style={styles.empty}>
-        <Text style={styles.emptyText}>Brak polubionych filmów</Text>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
       <HelpButton />
       <SearchButton />
       <Title title="Polubienia" />
 
-      <Selector<string>
-        options={SORT_OPTIONS}
-        selectedOption={sortOption}
-          onSelectOption={(optionId) => {
-            if (optionId !== null) {
-              setSortOption(optionId as SortOption);
-            }
-          }}
-        placeholder="Sortuj"
-      />
-
-      <View style={{ height: 16 }} />
-
-      <FlatList
-        data={sortedMovies}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.list}
-        renderItem={({ item }) => (
-          <MovieCard
-            movie={item}
-            userRating={item.vote_average}
-            onRemove={() => removeLikedMovie(item.id)}
-            onEdit={() => openModal(item)}
-            onPress={() => router.push(`/movie/${item.id}`)}
-            isWatched={false}
+      {isEmpty ? (
+        <View style={styles.empty}>
+          <Text style={styles.emptyText}>Nie masz jeszcze polubionych filmów</Text>
+        </View>
+      ) : (
+        <>
+          <Selector<string>
+            options={SORT_OPTIONS}
+            selectedOption={sortOption}
+            onSelectOption={(optionId) => {
+              if (optionId !== null) {
+                setSortOption(optionId as SortOption);
+              }
+            }}
+            placeholder="Sortuj"
           />
-        )}
-      />
+
+          <View style={{ height: 16 }} />
+
+          <FlatList
+            data={sortedMovies}
+            keyExtractor={(item) => item.id.toString()}
+            contentContainerStyle={styles.list}
+            renderItem={({ item }) => (
+              <MovieCard
+                movie={item}
+                userRating={item.vote_average}
+                onRemove={() => removeLikedMovie(item.id)}
+                onEdit={() => openModal(item)}
+                onPress={() => router.push(`/movie/${item.id}`)}
+                isWatched={false}
+              />
+            )}
+          />
+        </>
+      )}
 
       <AddWatchedModal
         visible={modalVisible}
@@ -116,11 +115,10 @@ export default function LikedMoviesScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   list: { paddingHorizontal: 16, paddingBottom: 32 },
-  empty: { 
-    flex: 1, 
-    justifyContent: 'center', 
+  empty: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Colors.background,
   },
   emptyText: { color: Colors.text, fontSize: 16 },
 });

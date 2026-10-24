@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -19,7 +19,11 @@ import { Fonts } from '@/constants/fonts';
 import { useMovies } from '@/hooks/useMovies';
 import useCreateSessionViewModel from '@/models/createSession';
 
-export default function CreateSessionView() {
+type Props = {
+  onCreated: (sessionId: string) => void;
+};
+
+export default function CreateSessionView({ onCreated }: Props) {
   const {
     participantCount,
     participantNames,
@@ -32,19 +36,21 @@ export default function CreateSessionView() {
 
   // Refs to every name input, so "next" on the keyboard focuses the next one
   const inputRefs = useRef<(TextInput | null)[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleGenerateSession = () => {
-    const result = generateSession();
+  const handleGenerateSession = async () => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+const result = await generateSession(selectedGenre);
+    setIsSubmitting(false);
 
     if (!result.success) {
       Alert.alert('Brak danych', result.message);
       return;
     }
 
-    Alert.alert(
-      'Sesja',
-      `Przygotowano dane sesji dla ${result.data.participantCount} osób.`,
-    );
+    onCreated(result.data.sessionId);
   };
 
   return (
