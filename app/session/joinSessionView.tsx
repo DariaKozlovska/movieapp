@@ -157,6 +157,7 @@ const styles = StyleSheet.create({
   },
 
   scanPlaceholder: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },

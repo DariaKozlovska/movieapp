@@ -15,6 +15,9 @@ type Props = {
   value: string;
   onChangeText: (text: string) => void;
   secureTextEntry?: boolean;
+  rightIcon?: keyof typeof Ionicons.glyphMap;
+  onRightIconPress?: () => void;
+  rightIconAccessibilityLabel?: string;
 };
 
 export default function AppInput({
@@ -22,8 +25,25 @@ export default function AppInput({
   value,
   onChangeText,
   secureTextEntry = false,
+  rightIcon,
+  onRightIconPress,
+  rightIconAccessibilityLabel,
 }: Props) {
   const [hidden, setHidden] = useState(secureTextEntry);
+
+  const iconName = secureTextEntry
+    ? hidden
+      ? 'eye-off-outline'
+      : 'eye-outline'
+    : rightIcon;
+
+  const handleIconPress = () => {
+    if (secureTextEntry) {
+      setHidden(!hidden);
+    } else {
+      onRightIconPress?.();
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -34,17 +54,27 @@ export default function AppInput({
         value={value}
         onChangeText={onChangeText}
         secureTextEntry={hidden}
+        autoCapitalize="none"
+        autoCorrect={false}
+        returnKeyType="search"
+        accessibilityLabel={placeholder}
       />
 
-      {secureTextEntry && (
+      {iconName && (
         <TouchableOpacity
-          onPress={() => setHidden(!hidden)}
+          onPress={handleIconPress}
           style={styles.icon}
+          disabled={!secureTextEntry && !onRightIconPress}
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={
+            rightIconAccessibilityLabel ?? 'Przycisk pola tekstowego'
+          }
         >
           <Ionicons
-            name={hidden ? 'eye-off-outline' : 'eye-outline'}
+            name={iconName}
             size={22}
-            color={Colors.border}
+            color={Colors.text}
           />
         </TouchableOpacity>
       )}
@@ -56,15 +86,11 @@ const styles = StyleSheet.create({
   container: {
     height: 56,
     minHeight: 56,
-
     borderRadius: 14,
-
     flexDirection: 'row',
     alignItems: 'center',
-
     width: '100%',
     paddingHorizontal: 16,
-
     backgroundColor: Colors.placeholder,
     borderWidth: 1,
     borderColor: Colors.border,
@@ -72,7 +98,6 @@ const styles = StyleSheet.create({
 
   input: {
     flex: 1,
-
     color: Colors.text,
     fontFamily: Fonts.bold,
     fontSize: 20,
@@ -80,5 +105,6 @@ const styles = StyleSheet.create({
 
   icon: {
     marginLeft: 10,
+    padding: 4,
   },
 });

@@ -71,6 +71,7 @@ export default function MovieDetailsScreen() {
   if (!movie) {
     return (
       <View style={styles.center}>
+        <BackButton />
         <Text style={{ color: Colors.text }}>Nie znaleziono filmu</Text>
       </View>
     );

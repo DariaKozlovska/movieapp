@@ -8,6 +8,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { LikedMoviesProvider } from '../contexts/LikedMoviesContext';
 import { WatchedMoviesProvider } from '../contexts/WatchedMoviesContext';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { SearchProvider } from '@/contexts/SearchContext';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -28,7 +29,9 @@ export default function RootLayout() {
       <AuthProvider>
         <LikedMoviesProvider>
           <WatchedMoviesProvider>
-            <Slot />
+            <SearchProvider>
+              <Slot />
+            </SearchProvider>
           </WatchedMoviesProvider>
         </LikedMoviesProvider>
       </AuthProvider>

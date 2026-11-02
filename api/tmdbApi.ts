@@ -14,6 +14,7 @@ interface TMDBVideosResponse {
   }[];
 }
 
+// Popular movies
 export const getPopularMovies = async (
   page: number = 1
 ): Promise<Movie[]> => {
@@ -31,6 +32,7 @@ export const getPopularMovies = async (
   return response.data.results;
 };
 
+// Movies filtered by genre
 export const getMovies = async (
   genreId: number | null,
   page: number = 1
@@ -51,6 +53,33 @@ export const getMovies = async (
   return response.data.results;
 };
 
+// Search movies by title
+export const searchMovies = async (
+  query: string
+): Promise<Movie[]> => {
+  const trimmedQuery = query.trim();
+
+  if (!trimmedQuery) {
+    return [];
+  }
+
+  const response = await axios.get<TMDBResponse>(
+    `${TMDB_BASE_URL}/search/movie`,
+    {
+      params: {
+        api_key: TMDB_API_KEY,
+        language: 'pl-PL',
+        query: trimmedQuery,
+        page: 1,
+        include_adult: false,
+      },
+    }
+  );
+
+  return response.data.results;
+};
+
+// Get a movie trailer
 export const getMovieTrailer = async (movieId: number) => {
   const response = await axios.get<TMDBVideosResponse>(
     `${TMDB_BASE_URL}/movie/${movieId}/videos`,
@@ -66,5 +95,7 @@ export const getMovieTrailer = async (movieId: number) => {
     v => v.type === 'Trailer' && v.site === 'YouTube'
   );
 
-  return trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : null;
+  return trailer
+    ? `https://www.youtube.com/watch?v=${trailer.key}`
+    : null;
 };

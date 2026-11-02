@@ -13,8 +13,6 @@ export type Session = {
   participantCount: number | null;
   /** TMDB genre id chosen when the room was created (null = all). */
   genre: number | null;
-  /** Names typed by the admin for the other people (lobby placeholders only). */
-  invitedNames: string[];
   status: SessionStatus;
   expiresAt: Timestamp;
   participantIds: string[];

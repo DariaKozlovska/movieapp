@@ -27,7 +27,6 @@ type Props = {
 export default function LobbyView({ sessionId, onLeave, onExpired }: Props) {
   const {
     session,
-    participants,
     isActive,
     isFull,
     timeLabel,
@@ -44,20 +43,6 @@ export default function LobbyView({ sessionId, onLeave, onExpired }: Props) {
       </View>
     );
   }
-
-  // one row per slot: people who joined (names from their accounts),
-  // then dimmed waiting slots
-  const rows = Array.from({ length: session.maxParticipants }, (_, i) => {
-    const joined = participants[i];
-    if (joined) return { key: joined.id, label: joined.name, pending: false };
-
-    const pendingIndex = i - participants.length;
-    return {
-      key: `pending-${i}`,
-      label: session.invitedNames[pendingIndex] || 'Oczekiwanie…',
-      pending: true,
-    };
-  });
 
   return (
     <View style={styles.container}>
@@ -82,7 +67,7 @@ export default function LobbyView({ sessionId, onLeave, onExpired }: Props) {
           <View style={styles.qrBox}>
             <QRCode
               value={session.code}
-              size={180}
+              size={200}
               color="#000000"
               backgroundColor="#FFFFFF"
               quietZone={4}
@@ -96,17 +81,10 @@ export default function LobbyView({ sessionId, onLeave, onExpired }: Props) {
           </View>
           <Text style={styles.time}>{timeLabel}</Text>
         </View>
-
-        <View style={[styles.card, styles.namesCard]}>
-          {rows.map((row, index) => (
-            <View key={row.key}>
-              {index > 0 && <View style={styles.divider} />}
-              <Text style={[styles.name, row.pending && styles.namePending]}>
-                {row.label}
-              </Text>
-            </View>
-          ))}
-        </View>
+{/* 
+        <Text style={styles.joined}>
+          Uczestnicy: {session.participantIds.length} z {session.maxParticipants}
+        </Text> */}
       </ScrollView>
 
       <View style={styles.footer}>
@@ -211,25 +189,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 
-  namesCard: {
-    overflow: 'hidden',
-  },
-
-  divider: {
-    height: 1,
-    backgroundColor: Colors.border,
-  },
-
-  name: {
-    height: 56,
-    lineHeight: 56,
+  joined: {
+    textAlign: 'center',
     color: Colors.text,
     fontFamily: Fonts.bold,
-    fontSize: 20,
-  },
-
-  namePending: {
-    opacity: 0.4,
+    fontSize: 18,
   },
 
   footer: {

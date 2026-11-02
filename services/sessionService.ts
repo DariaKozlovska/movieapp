@@ -38,7 +38,6 @@ type CreateSessionInput = {
   adminName: string;
   maxParticipants: number;
   genre?: number | null;
-  invitedNames?: string[];
 };
 
 export async function createSession(
@@ -49,7 +48,6 @@ export async function createSession(
     adminName,
     maxParticipants,
     genre = null,
-    invitedNames = [],
   } = input;
 
   try {
@@ -84,7 +82,6 @@ export async function createSession(
           maxParticipants,
           participantCount: null,
           genre,
-          invitedNames,
           status: 'waiting',
           expiresAt,
           deleteAt,

@@ -67,7 +67,7 @@ export default function useCreateSessionViewModel() {
       adminName: creatorName,
       maxParticipants: participantCount,
       genre,
-      invitedNames,
+      // invitedNames,
     });
   };
 

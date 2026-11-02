@@ -8,11 +8,10 @@ import {
   SESSION_TTL_MS,
   closeSession,
   startSession,
-  subscribeParticipants,
   subscribeSession,
 } from '@/services/sessionService';
 import { buildMovieDeck } from '@/services/movieDeck';
-import type { Participant, Session } from '@/types/session';
+import type { Session } from '@/types/session';
 
 // Guests wait a few seconds longer than the admin's clock before they give up
 // (only matters when the admin's app is closed and cannot close the room).
@@ -30,7 +29,6 @@ export default function useLobbyViewModel(
   { onLeave, onExpired }: Options,
 ) {
   const [session, setSession] = useState<Session | null>(null);
-  const [participants, setParticipants] = useState<Participant[]>([]);
   const [isStarting, setIsStarting] = useState(false);
   const [graceOver, setGraceOver] = useState(false);
   const overHandled = useRef(false);
@@ -38,10 +36,6 @@ export default function useLobbyViewModel(
   const uid = auth.currentUser?.uid ?? null;
 
   useEffect(() => subscribeSession(sessionId, setSession), [sessionId]);
-  useEffect(
-    () => subscribeParticipants(sessionId, setParticipants),
-    [sessionId],
-  );
 
   const isWaiting = session?.status === 'waiting';
   const isAdmin = !!uid && session?.adminId === uid;
@@ -131,7 +125,6 @@ export default function useLobbyViewModel(
 
   return {
     session,
-    participants,
     isAdmin,
     isWaiting,
     isActive: session?.status === 'active',
