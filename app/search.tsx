@@ -115,6 +115,7 @@ export default function SearchScreen() {
                 userRating={item.vote_average}
                 onPress={() => handleMoviePress(item.id)}
                 isWatched={false}
+                showTrailerButton
               />
             )}
             contentContainerStyle={styles.list}

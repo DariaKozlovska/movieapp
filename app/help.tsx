@@ -1,3 +1,4 @@
+import { BackButton } from '@/components/Button/BackButton';
 import React from 'react';
 import {
   View,
@@ -8,6 +9,7 @@ import {
 export default function HelpScreen() {
   return (
     <View style={styles.container}>
+      <BackButton />
       <Text style={styles.text}>
         Instrukcja korzystania z aplikacji
       </Text>

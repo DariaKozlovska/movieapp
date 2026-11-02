@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StyleSheet } from 'react-native';
-import { Slot } from 'expo-router';
+import { Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 
@@ -9,6 +9,7 @@ import { LikedMoviesProvider } from '../contexts/LikedMoviesContext';
 import { WatchedMoviesProvider } from '../contexts/WatchedMoviesContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { SearchProvider } from '@/contexts/SearchContext';
+import { Colors } from '@/constants/colors';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -30,7 +31,19 @@ export default function RootLayout() {
         <LikedMoviesProvider>
           <WatchedMoviesProvider>
             <SearchProvider>
-              <Slot />
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  // avoids a white flash between screens in a dark app
+                  contentStyle: { backgroundColor: Colors.background },
+                }}
+              >
+                {/* iOS edge-swipe back would fight with swiping the cards */}
+                <Stack.Screen
+                  name="room-swipe"
+                  options={{ gestureEnabled: false }}
+                />
+              </Stack>
             </SearchProvider>
           </WatchedMoviesProvider>
         </LikedMoviesProvider>

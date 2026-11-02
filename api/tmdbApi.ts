@@ -14,6 +14,19 @@ interface TMDBVideosResponse {
   }[];
 }
 
+interface TMDBMovieDetails {
+  id: number;
+  title: string;
+  overview: string;
+  poster_path: string | null;
+  release_date: string;
+  vote_average: number;
+  genres?: {
+    id: number;
+    name: string;
+  }[];
+}
+
 // Popular movies
 export const getPopularMovies = async (
   page: number = 1
@@ -79,6 +92,33 @@ export const searchMovies = async (
   return response.data.results;
 };
 
+// Get complete movie details by ID
+export const getMovieDetails = async (
+  movieId: number
+): Promise<Movie> => {
+  const response = await axios.get<TMDBMovieDetails>(
+    `${TMDB_BASE_URL}/movie/${movieId}`,
+    {
+      params: {
+        api_key: TMDB_API_KEY,
+        language: 'pl-PL',
+      },
+    }
+  );
+
+  const data = response.data;
+
+  return {
+    id: data.id,
+    title: data.title,
+    overview: data.overview ?? '',
+    poster_path: data.poster_path ?? '',
+    release_date: data.release_date ?? '',
+    vote_average: data.vote_average ?? 0,
+    genre_ids: data.genres?.map((genre) => genre.id) ?? [],
+  };
+};
+
 // Get a movie trailer
 export const getMovieTrailer = async (movieId: number) => {
   const response = await axios.get<TMDBVideosResponse>(
@@ -92,7 +132,7 @@ export const getMovieTrailer = async (movieId: number) => {
   );
 
   const trailer = response.data.results.find(
-    v => v.type === 'Trailer' && v.site === 'YouTube'
+    (v) => v.type === 'Trailer' && v.site === 'YouTube'
   );
 
   return trailer

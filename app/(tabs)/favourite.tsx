@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import HelpButton from '@/components/Button/HelpButton';
+import { SearchButton } from '@/components/Button/SearchButton';
+import Selector from '@/components/Selectors/Selector';
+import Title from '@/components/Text/title';
+import { Colors } from '@/constants/colors';
+import { SORT_OPTIONS } from '@/constants/sortOptions';
+import { SortOption, useMovieSorting } from '@/hooks/useMovieSorting';
 import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
+import Toast from 'react-native-root-toast';
+import AddWatchedModal from '../../components/AddWatchedModal';
+import MovieCard from '../../components/MovieCard';
 import { useLikedMovies } from '../../contexts/LikedMoviesContext';
 import { useWatchedMovies } from '../../contexts/WatchedMoviesContext';
 import { Movie } from '../../models/Movie';
-import Toast from 'react-native-root-toast';
-import MovieCard from '../../components/MovieCard';
-import AddWatchedModal from '../../components/AddWatchedModal';
-import Title from '@/components/Text/title';
-import { Colors } from '@/constants/colors';
-import { SearchButton } from '@/components/Button/SearchButton';
-import HelpButton from '@/components/Button/HelpButton';
-import Selector from '@/components/Selectors/Selector';
-import { SortOption, useMovieSorting } from '@/hooks/useMovieSorting';
-import { SORT_OPTIONS } from '@/constants/sortOptions';
 
 const MAX_REVIEW_LENGTH = 100;
 

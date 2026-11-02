@@ -1,20 +1,13 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  Alert,
-} from 'react-native';
+import { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-
 import { TMDB_IMAGE_URL } from '../constants/config';
 import { Movie } from '../models/Movie';
 import { WatchedMovie } from '../models/WatchedMovie';
 import StarRating from './StarRating';
-
 import { Colors } from '@/constants/colors';
 import { Fonts } from '@/constants/fonts';
+import { openMovieTrailer } from '@/utils/openMovieTrailer';
 
 interface Props {
   movie: Movie | WatchedMovie;
@@ -24,6 +17,8 @@ interface Props {
   onEdit?: () => void;
   onPress?: () => void;
   isWatched?: boolean;
+  // shows "Zobacz zwiastun" instead of "Już obejrzałem"
+  showTrailerButton?: boolean;
 }
 
 export default function MovieCard({
@@ -34,10 +29,11 @@ export default function MovieCard({
   onEdit,
   onPress,
   isWatched = false,
+  showTrailerButton = false,
 }: Props) {
-  const confirmRemove = () => {
-    if (!onRemove) return;
+  const [loadingTrailer, setLoadingTrailer] = useState(false);
 
+  const confirmRemove = () => {
     Alert.alert(
       'Usuń film',
       'Czy na pewno chcesz usunąć ten film?',
@@ -54,6 +50,14 @@ export default function MovieCard({
       ],
       { cancelable: true }
     );
+  };
+
+  const handleTrailer = async () => {
+    if (loadingTrailer) return;
+
+    setLoadingTrailer(true);
+    await openMovieTrailer(movie);
+    setLoadingTrailer(false);
   };
 
   return (
@@ -79,46 +83,21 @@ export default function MovieCard({
             <Text style={styles.title} numberOfLines={2}>
               {movie.title}
             </Text>
-
             {isWatched ? (
-              <StarRating
-                rating={userRating ?? 0}
-                onChange={() => {}}
-              />
+              <StarRating rating={userRating ?? 0} onChange={() => {}} />
             ) : (
-              <View
-                style={{
-                  marginBottom: 12,
-                  flexDirection: 'row',
-                  alignItems: 'flex-end',
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 16,
-                    color: Colors.text,
-                    marginRight: 2,
-                    fontFamily: Fonts.bold,
-                  }}
-                >
+              <View style={{ marginBottom: 12, flexDirection: 'row', alignItems: 'flex-end'}}>
+                <Text style={{ fontSize: 16, color: Colors.text, marginRight: 2, fontFamily: Fonts.bold }}>
                   {userRating?.toFixed(1)}
                 </Text>
-
-                <Image
-                  source={require('@/assets/images/Star.png')}
-                  style={{ width: 20, height: 20 }}
-                />
+                <Image source={require('@/assets/images/Star.png')} style={{ width: 20, height: 20 }} />
               </View>
             )}
           </View>
-
           <View style={styles.rightBlock}>
+            {/* the remove button only exists when the screen can remove */}
             {onRemove && (
-              <TouchableOpacity
-                onPress={confirmRemove}
-                accessibilityRole="button"
-                accessibilityLabel="Usuń film"
-              >
+              <TouchableOpacity onPress={confirmRemove}>
                 <View
                   style={{
                     width: 32,
@@ -129,21 +108,14 @@ export default function MovieCard({
                     alignItems: 'center',
                   }}
                 >
-                  <Ionicons
-                    name="close"
-                    size={24}
-                    color={Colors.text}
-                  />
+                  <Ionicons name="close" size={24} color={Colors.text} />
                 </View>
               </TouchableOpacity>
             )}
 
             {isWatched && onEdit && (
-              <TouchableOpacity
-                onPress={onEdit}
-                style={{ marginTop: 8 }}
-              >
-                <View
+              <TouchableOpacity onPress={onEdit} style={{ marginTop: 8 }}>
+                <View 
                   style={{
                     width: 28,
                     height: 28,
@@ -153,11 +125,7 @@ export default function MovieCard({
                     alignItems: 'center',
                   }}
                 >
-                  <Ionicons
-                    name="pencil"
-                    size={18}
-                    color={Colors.text}
-                  />
+                  <Ionicons name="pencil" size={18} color={Colors.text} />
                 </View>
               </TouchableOpacity>
             )}
@@ -166,50 +134,41 @@ export default function MovieCard({
 
         {isWatched ? (
           userReview ? (
-            <View>
-              <Text style={styles.review} numberOfLines={3}>
-                {'"'}{userReview}{'"'}
-              </Text>
-            </View>
+          <View>
+            <Text style={styles.review} numberOfLines={3}>
+              {'"'}{userReview}{'"'}
+            </Text>
+          </View>
           ) : null
+        ) : showTrailerButton ? (
+          <TouchableOpacity
+            style={styles.trailerButton}
+            onPress={handleTrailer}
+          >
+            <Text style={styles.watchedText}>
+              {loadingTrailer ? 'Ładowanie...' : 'Zobacz zwiastun'}
+            </Text>
+          </TouchableOpacity>
         ) : (
           <TouchableOpacity
             style={styles.watchedButton}
             onPress={onEdit}
           >
-            <Text style={styles.watchedText}>
-              Już obejrzałem
-            </Text>
+            <Text style={styles.watchedText}>Już obejrzałem</Text>
           </TouchableOpacity>
         )}
+
       </View>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
+  container: { flex: 1, backgroundColor: Colors.background },
+  listContent: { padding: 16, paddingBottom: 32, flexGrow: 1 },
 
-  listContent: {
-    padding: 16,
-    paddingBottom: 32,
-    flexGrow: 1,
-  },
-
-  empty: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: Colors.background,
-  },
-
-  emptyText: {
-    color: Colors.text,
-    fontSize: 18,
-  },
+  empty: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.background },
+  emptyText: { color: Colors.text, fontSize: 18 },
 
   card: {
     flexDirection: 'row',
@@ -227,7 +186,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
   noImageText: {
     color: '#888',
     fontSize: 12,
@@ -240,13 +198,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
   },
-
   review: {
     color: '#ccc',
     marginBottom: 8,
     fontStyle: 'italic',
   },
-
   removeCircle: {
     width: 28,
     height: 28,
@@ -256,65 +212,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  image: {
-    width: 110,
-    minHeight: 150,
-    alignSelf: 'stretch',
-    resizeMode: 'cover',
-  },
-
-  infoBlock: {
-    flex: 1,
-    padding: 12,
-    justifyContent: 'space-between',
-  },
-
-  textBlock: {
-    flex: 1,
-    paddingRight: 26,
-    justifyContent: 'flex-start',
-  },
-
-  topBlock: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-
-  title: {
-    color: Colors.text,
-    fontSize: 24,
-    fontFamily: Fonts.bold,
-  },
-
-  rating: {
-    marginTop: 6,
-    color: Colors.text,
-    fontSize: 14,
-  },
-
-  rightBlock: {
-    alignItems: 'flex-end',
-  },
-
-  removeText: {
-    color: Colors.red,
-    fontSize: 20,
-    fontWeight: '700',
-  },
-
-  watchedButton: {
-    backgroundColor: Colors.green,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-
-  watchedText: {
-    color: Colors.text,
-    fontSize: 18,
-    fontFamily: Fonts.bold,
-    textAlign: 'center',
-    paddingVertical: 8,
-  },
+  image: { width: 110, minHeight: 150, alignSelf: 'stretch', resizeMode: 'cover' },
+  infoBlock: { flex: 1, padding: 12, justifyContent: 'space-between' },
+  textBlock: { flex: 1, paddingRight: 26, justifyContent: 'flex-start' },
+  topBlock: { flex: 1, flexDirection: 'row', justifyContent: 'space-between'},
+  title: { color: Colors.text, fontSize: 24, fontFamily: Fonts.bold },
+  rating: { marginTop: 6, color: Colors.text, fontSize: 14 },
+  rightBlock: { alignItems: 'flex-end' },
+  removeText: { color: Colors.red, fontSize: 20, fontWeight: '700' },
+  watchedButton: { backgroundColor: Colors.green, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 },
+  trailerButton: { backgroundColor: Colors.red, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 },
+  watchedText: { color: Colors.text, fontSize: 18, fontFamily: Fonts.bold, textAlign: 'center', paddingVertical: 8 },
 });
