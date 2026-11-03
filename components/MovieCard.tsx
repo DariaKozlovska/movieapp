@@ -95,7 +95,6 @@ export default function MovieCard({
             )}
           </View>
           <View style={styles.rightBlock}>
-            {/* the remove button only exists when the screen can remove */}
             {onRemove && (
               <TouchableOpacity onPress={confirmRemove}>
                 <View

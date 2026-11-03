@@ -47,7 +47,8 @@
       ["expo-camera", 
         { "cameraPermission": "Aplikacja używa aparatu do skanowania kodu QR pokoju." 
         }
-      ]
+      ],
+      ["expo-notifications", { "defaultChannel": "default" }]
     ],
     "experiments": {
       "typedRoutes": true,

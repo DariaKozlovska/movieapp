@@ -11,6 +11,10 @@ import {
   subscribeSession,
 } from '@/services/sessionService';
 import { buildMovieDeck } from '@/services/movieDeck';
+import {
+  cancelExpiryWarning,
+  scheduleExpiryWarning,
+} from '@/services/notificationService';
 import type { Session } from '@/types/session';
 
 // Guests wait a few seconds longer than the admin's clock before they give up
@@ -67,6 +71,21 @@ export default function useLobbyViewModel(
     onExpired();
   }, [isOver, isAdmin, isWaiting, sessionId, onExpired]);
 
+  // Admin only: a notification one minute before the code expires.
+  // Rescheduled when somebody joins (the text changes), cancelled when the
+  // room starts or closes.
+  const expiresAtMs = session ? session.expiresAt.toMillis() : null;
+
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    if (isWaiting && expiresAtMs !== null) {
+      scheduleExpiryWarning(sessionId, expiresAtMs, joinedCount >= 2);
+    } else {
+      cancelExpiryWarning(sessionId);
+    }
+  }, [isAdmin, isWaiting, expiresAtMs, joinedCount, sessionId]);
+
   // Admin started the session -> everybody goes to the swipe screen
   useEffect(() => {
     if (session?.status === 'active') {
@@ -119,6 +138,7 @@ export default function useLobbyViewModel(
   };
 
   const handleLeave = () => {
+    if (isAdmin) cancelExpiryWarning(sessionId);
     if (isAdmin && isWaiting) closeSession(sessionId);
     onLeave();
   };

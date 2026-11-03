@@ -19,11 +19,20 @@ export default function SettingsScreen() {
     <View style={styles.container}>
       <HelpButton />
       <Title title="Ustawienia" style={{ marginBottom: 30 }} />
-
+      
       <View style={styles.content}>
-        <SettingButton title="Dane osobowe" onPress={() => {}} />
-        <SettingButton title="Polityka prywatności" onPress={() => {}} />
-        <SettingButton title="Powiadomienia i dźwięki" onPress={() => {}} />
+        <SettingButton
+          title="Dane osobowe"
+          onPress={() => router.push('/setting/PersonalData')}
+        />
+        <SettingButton
+          title="Polityka prywatności"
+          onPress={() => router.push('/setting/privacy')}
+        />
+        <SettingButton
+          title="Powiadomienia i dźwięki"
+          onPress={() => router.push('/setting/notifications')}
+        />
       </View>
 
       <View style={styles.footer}>

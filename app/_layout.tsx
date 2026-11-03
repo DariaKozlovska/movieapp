@@ -10,8 +10,11 @@ import { WatchedMoviesProvider } from '../contexts/WatchedMoviesContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { SearchProvider } from '@/contexts/SearchContext';
 import { Colors } from '@/constants/colors';
+import NotificationManager from '@/components/notificationManager';
+import { configureNotifications } from '@/services/notificationService';
 
 SplashScreen.preventAutoHideAsync();
+configureNotifications();
 
 export default function RootLayout() {
   const [loaded] = useFonts({
@@ -31,14 +34,13 @@ export default function RootLayout() {
         <LikedMoviesProvider>
           <WatchedMoviesProvider>
             <SearchProvider>
+              <NotificationManager />
               <Stack
                 screenOptions={{
                   headerShown: false,
-                  // avoids a white flash between screens in a dark app
                   contentStyle: { backgroundColor: Colors.background },
                 }}
               >
-                {/* iOS edge-swipe back would fight with swiping the cards */}
                 <Stack.Screen
                   name="room-swipe"
                   options={{ gestureEnabled: false }}

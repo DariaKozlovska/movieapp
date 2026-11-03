@@ -14,6 +14,7 @@ import {
   setRoomDeck,
   setRoomProgress,
 } from '@/services/roomMovieCache';
+import { scheduleRatingReminder } from '@/services/notificationService';
 import type { Movie } from '@/models/Movie';
 import type { Session } from '@/types/session';
 
@@ -60,6 +61,14 @@ export default function useRoomSwipeViewModel(sessionId: string) {
     session?.status === 'active' && session.matchedMovieId != null
       ? (deck.find((m) => m.id === session.matchedMovieId) ?? null)
       : null;
+
+  // a day after a match: "how was the movie?" (only if reminders are on)
+  useEffect(() => {
+    if (matchedMovie) {
+      scheduleRatingReminder(matchedMovie.id, matchedMovie.title);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matchedMovie?.id]);
 
   // admin ended the session -> everybody goes back to the rooms screen
   useEffect(() => {
